@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useLocation } from "react-router-dom";
 import { Grid, List, ShoppingCart, Star, SlidersHorizontal, ChevronDown, X } from 'lucide-react';
 import api from "../components/Api";
@@ -58,11 +58,7 @@ const ProductsPage = () => {
     }
   };
 
-  useEffect(() => {
-    fetchProducts();
-  }, [query, selectedCategory, selectedSubcategory, priceFrom, priceTo, selectedMaterial, sortBy]);
-
-  const fetchProducts = async () => {
+  const fetchProducts = useCallback(async () => {
     try {
       setLoading(true);
       const params = {
@@ -84,8 +80,12 @@ const ProductsPage = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [query, selectedCategory, selectedSubcategory, priceFrom, priceTo, selectedMaterial, sortBy]);
 
+  useEffect(() => {
+    fetchProducts();
+  }, [fetchProducts]);
+  
   const handleMaterialToggle = (material) => {
     setSelectedMaterial((prev) =>
       prev.includes(material)
