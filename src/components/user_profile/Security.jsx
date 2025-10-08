@@ -75,7 +75,7 @@ const Security = () => {
           <div className="flex items-center justify-between mb-4">
             <div>
               <h3 className="text-lg font-semibold text-gray-900 mb-1">Password</h3>
-              <p className="text-sm text-gray-600">Last changed 2 months ago</p>
+              <p className="text-sm text-gray-600">Update your account password</p>
             </div>
             <button
               onClick={() => setShowPasswordFields(!showPasswordFields)}
@@ -162,6 +162,18 @@ const Security = () => {
               </button>
             </div>
           )}
+        </div>
+
+        <div className="p-6 border border-gray-200 rounded-lg flex items-center justify-between mb-4">
+          <div>
+            <h3 className="text-lg font-semibold text-gray-900 mb-1">Need Help?</h3>
+            <p className="text-sm text-gray-600">
+              If you're having trouble changing your password, our support team is here to help
+            </p>
+          </div>
+          <button className="px-4 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors">
+            Contact Support
+          </button>
         </div>
 
         {/* Delete Account */}
