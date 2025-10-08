@@ -132,7 +132,7 @@ const ProductDetailsPage = () => {
 
     const productName = product.name;
     const slug = product.slug
-    const shareUrl = `http://localhost:3001/product/${slug}`;
+    const shareUrl = `https://ceramicry.netlify.app//product/${slug}`;
 
     if (navigator.share) {
       try {
