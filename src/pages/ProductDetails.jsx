@@ -60,6 +60,7 @@ const ProductDetailsPage = () => {
           setReviews(response.data.data);
       } catch (error) {
         setError(error.response?.data?.errors || "Error fetching reviews:");
+        setReviews([]);
       }
     };
     fetchReviews();
