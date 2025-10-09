@@ -55,8 +55,7 @@ const ProductDetailsPage = () => {
     const fetchReviews = async () => {
       const token = localStorage.getItem("token");
       try {
-        const response = await api.get(`products/${product.id}/reviews`,
-          { headers: { Token: `Bearer ${token}` } });
+        const response = await api.get(`products/${product.id}/reviews`);
           setReviews(response.data.data);
       } catch (error) {
         toast.error(Array.isArray(error.response?.data?.errors)
