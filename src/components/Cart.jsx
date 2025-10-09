@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Trash2, Plus, Minus, ShoppingBag, ArrowRight, Tag, Truck, Lock, Gift, X, Check } from 'lucide-react';
 import api from "../components/Api";
+import { Toaster, toast } from 'react-hot-toast';
 
 const Cart = () => {
   const [cartItems, setCartItems] = useState([]);
@@ -9,12 +10,19 @@ const Cart = () => {
   const [couponCode, setCouponCode] = useState('');
   const [appliedCoupon, setAppliedCoupon] = useState(null);
   const [showCouponInput, setShowCouponInput] = useState(false);
+  const [availableCoupons, setAvailableCoupons] = useState([]);
 
-  const availableCoupons = [
-    { code: 'SAVE10', discount: 10, minOrder: 10000, description: '10% off on orders above ₹10,000' },
-    { code: 'FLAT500', discount: 500, minOrder: 5000, description: '₹500 off on orders above ₹5,000' },
-    { code: 'WELCOME15', discount: 15, minOrder: 0, description: '15% off for new customers' }
-  ];
+  const fetchAvailableCoupons = async () => {
+    setLoading(true);
+    try {
+      const res = await api.get("offers");
+      setAvailableCoupons(res.data.data);
+    } catch (err) {
+      toast.error(err.response?.data?.errors);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const fetchCart = async () => {
     setLoading(true);
@@ -28,15 +36,11 @@ const Cart = () => {
         setCartItems([]);
       }
     } catch (err) {
-      console.error("Failed to fetch cart items", err);
+      toast.error(err.response?.data?.errors);
     } finally {
       setLoading(false);
     }
   };
-
-  useEffect(() => {
-    fetchCart();
-  }, []);
 
   const updateQuantity = async (itemId, qty) => {
     if (qty < 1) return;
@@ -45,7 +49,7 @@ const Cart = () => {
       await api.patch('cart/update_item', {cart_item_id: itemId, qty }, { headers: { Token: `Bearer ${token}` } });
       fetchCart();
     } catch (err) {
-      console.error("Failed to update quantity", err);
+      toast.error(err.response?.data?.errors);
     }
   };
 
@@ -55,27 +59,76 @@ const Cart = () => {
       await api.delete('cart/remove_item', { headers: { Token: `Bearer ${token}` }, data: { cart_item_id: itemId } });
       fetchCart();
     } catch (err) {
-      console.error("Failed to remove item", err);
+      toast.error(err.response?.data?.errors);
     }
   };
 
-  const applyCoupon = (code) => {
-    const coupon = availableCoupons.find(c => c.code === code.toUpperCase());
-    const subtotal = calculateSubtotal();
-    
-    if (coupon && subtotal >= coupon.minOrder) {
-      setAppliedCoupon(coupon);
+  const applyCoupon = async (code) => {
+    try {
+      const token = localStorage.getItem("token");
+      const totalAmount = calculateSubtotal();
+
+      const res = await api.post(
+        `offers/${code}/apply`,
+        { total_amount: totalAmount },
+        { headers: { Token: `Bearer ${token}` } }
+      );
+
+      const data = res.data;
+
+      setAppliedCoupon({
+        code,
+        discount: data.discount,
+        message: data.message,
+        finalAmount: data.final_amount,
+      });
       setCouponCode('');
       setShowCouponInput(false);
-    } else if (coupon && subtotal < coupon.minOrder) {
-      alert(`Minimum order value of ₹${coupon.minOrder} required for this coupon`);
-    } else {
-      alert('Invalid coupon code');
+      toast.success("Coupon applied successfully! 🎉");
+    } catch (err) {
+      toast.error(err.response?.data?.errors);
+      setCouponCode('');
     }
   };
+
+  const applyCouponLocally = (coupon) => {
+    let type = '₹';
+    let discount = coupon.discount;
+
+    if (coupon.discount < 100) {
+      type = '%';
+    } else {
+      discount = parseFloat(coupon.discount);
+    }
+
+    const applied = {
+      ...coupon,
+      discount,
+      type,
+      discountDisplay: type === '%' ? `${coupon.discount}%` : `₹${coupon.discount}`
+    };
+
+    setAppliedCoupon(applied);
+    localStorage.setItem('appliedCoupon', JSON.stringify(applied));
+    setCouponCode('');
+    setShowCouponInput(false);
+    toast.success("Coupon applied successfully! 🎉");
+  };
+
+  useEffect(() => {
+    fetchCart();
+    fetchAvailableCoupons();
+
+    const savedCoupon = localStorage.getItem('appliedCoupon');
+    if (savedCoupon) {
+      setAppliedCoupon(JSON.parse(savedCoupon));
+    }
+  }, []);
 
   const removeCoupon = () => {
     setAppliedCoupon(null);
+    localStorage.removeItem('appliedCoupon');
+    toast.success("Coupon removed!");
   };
 
   const calculateSubtotal = () => {
@@ -95,11 +148,12 @@ const Cart = () => {
 
   const calculateDiscount = () => {
     if (!appliedCoupon) return 0;
-    const subtotal = calculateSubtotal();
-    return appliedCoupon.discount < 100
-      ? Math.floor((subtotal * appliedCoupon.discount) / 100)
-      : appliedCoupon.discount;
-  };
+    if (appliedCoupon.type === '%') {
+      return (calculateSubtotal() * appliedCoupon.discount) / 100;
+    }
+
+    return parseFloat(appliedCoupon.discount) || 0;
+    };
 
   const calculateShipping = () => {
     const subtotal = calculateSubtotal();
@@ -107,6 +161,7 @@ const Cart = () => {
   };
 
   const calculateTotal = () => {
+    if (appliedCoupon?.finalAmount) return appliedCoupon.finalAmount + calculateShipping();
     return calculateSubtotal() - calculateDiscount() + calculateShipping();
   };
 
@@ -138,6 +193,7 @@ const Cart = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      <Toaster position="top-right" />
       {/* Header */}
       <div className="bg-white border-b border-gray-200 sticky top-0 z-40">
         <div className="max-w-7xl sm:max-w-auto mx-auto px-4 py-6">
@@ -252,6 +308,7 @@ const Cart = () => {
             })}
 
             {/* Available Coupons */}
+            {availableCoupons.length > 0 && (
             <div className="bg-white rounded-lg shadow-sm p-6">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-lg font-semibold text-gray-900 flex items-center">
@@ -275,16 +332,21 @@ const Cart = () => {
                         <p className="text-sm text-gray-600">{coupon.description}</p>
                       </div>
                       <button
-                        onClick={() => applyCoupon(coupon.code)}
-                        className="px-4 py-2 text-sm font-semibold text-gray-900 border border-gray-900 rounded-lg hover:bg-gray-900 hover:text-white transition-colors"
+                        disabled={appliedCoupon?.code === coupon.code}
+                        onClick={() => applyCouponLocally(coupon)}
+                        className={`px-4 py-2 text-sm font-semibold border rounded-lg transition-colors
+                          ${appliedCoupon?.code === coupon.code 
+                            ? 'bg-green-600 text-white border-green-600 cursor-default' 
+                            : 'text-gray-900 border-gray-900 hover:bg-gray-900 hover:text-white'}`}
                       >
-                        Apply
+                        {appliedCoupon?.code === coupon.code ? 'Applied' : 'Apply'}
                       </button>
                     </div>
                   </div>
                 ))}
               </div>
             </div>
+            )}
           </div>
 
           {/* Order Summary Sidebar */}

@@ -1,5 +1,5 @@
 import React, {useState, useEffect} from "react";
-import { ShoppingCartIcon } from "lucide-react";
+import { ShoppingCartIcon, Star } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import api from "../components/Api"
 
@@ -96,7 +96,19 @@ const FeaturedProducts = () => {
             {/* Content */}
             <div className="p-4 flex flex-col flex-1">
               <h3 className="text-lg font-bold text-black">{item.name}</h3>
-              <p className="text-sm text-gray-400 mt-2 flex-1">⭐⭐⭐⭐(82)</p>
+              <p className="flex items-center space-x-1 mt-2">
+                {[...Array(5)].map((_, i) => (
+                  <Star
+                    key={i}
+                    className={`w-4 h-4 ${
+                      i < Math.floor(item.average_rating)
+                        ? 'fill-yellow-400 text-yellow-400'
+                        : 'text-gray-300'
+                    }`}
+                  />
+                ))}
+                <span className="text-sm text-gray-400 ml-2">({item.review_count})</span>
+              </p>
               <div className="mt-2">
                 <span className="text-sm text-gray-400 line-through">
                   ₹{item.variants?.[0]?.original_price}

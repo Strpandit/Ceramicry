@@ -376,7 +376,7 @@ const ProductCard = ({ product, viewMode }) => {
                   <Star
                     key={i}
                     className={`w-4 h-4 ${
-                      i < Math.floor(product.views_count)
+                      i < Math.floor(product.average_rating)
                         ? 'fill-yellow-400 text-yellow-400'
                         : 'text-gray-300'
                     }`}
@@ -384,7 +384,7 @@ const ProductCard = ({ product, viewMode }) => {
                 ))}
               </div>
               <span className="text-sm text-gray-600">
-                {product.rating} ({product.views_count} reviews)
+                {product.average_rating} ({product.review_count} reviews)
               </span>
             </div>
           </div>
@@ -453,13 +453,13 @@ const ProductCard = ({ product, viewMode }) => {
             <Star
               key={i}
               className={`w-4 h-4 ${
-                i < Math.floor(product.views_count)
+                i < Math.floor(product.average_rating)
                   ? 'fill-yellow-400 text-yellow-400'
                   : 'text-gray-300'
               }`}
             />
           ))}
-          <span className="text-sm text-gray-600 ml-2">({product.views_count})</span>
+          <span className="text-sm text-gray-600 ml-2">{product.average_rating} ({product.review_count} reviews)</span>
         </div>
         
         <div className="flex items-center justify-between mb-3">

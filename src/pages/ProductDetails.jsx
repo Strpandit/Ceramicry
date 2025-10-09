@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ShoppingCart, Share2, Star, Check, Truck, Shield, RefreshCw, ChevronLeft, ChevronRight, Plus, Minus, Package } from 'lucide-react';
+import { X, ShoppingCart, Share2, Star, Check, Truck, Shield, RefreshCw, ChevronLeft, ChevronRight, Plus, Minus, Package } from 'lucide-react';
 import { useNavigate, useParams } from "react-router-dom";
 import api from "../components/Api";
 
@@ -7,6 +7,9 @@ const ProductDetailsPage = () => {
   const navigate = useNavigate();
   const { slug } = useParams();
   const [product, setProduct] = useState(null);
+  const [reviews, setReviews] = useState([]);
+  const [showReviewPopup, setShowReviewPopup] = useState(false);
+  const [newReview, setNewReview] = useState({ title: "", comment: "", rating: 0 });
   const [loading, setLoading] = useState(true);
   const [selectedImage, setSelectedImage] = useState(0);
   // const [relatedProducts, setRelatedProducts] = useState([]);
@@ -15,38 +18,6 @@ const ProductDetailsPage = () => {
   const [error, setError] = useState('')
   const staticImages = ["/img.png", "/img.png", "/img.png", "/img.png"];
 
-  const reviews = [
-    {
-      id: 1,
-      author: 'Sarah M.',
-      rating: 5,
-      date: 'March 15, 2025',
-      verified: true,
-      title: 'Absolutely Beautiful!',
-      comment: 'This dinner set exceeded my expectations. The quality is outstanding and it looks gorgeous on my dining table. The plates are sturdy and the white finish is pristine.',
-      helpful: 45
-    },
-    {
-      id: 2,
-      author: 'John D.',
-      rating: 5,
-      date: 'March 10, 2025',
-      verified: true,
-      title: 'Perfect for everyday use',
-      comment: 'Been using this set for a month now. It\'s dishwasher safe which is a huge plus. No chips or scratches yet. Great value for money!',
-      helpful: 32
-    },
-    {
-      id: 3,
-      author: 'Emily R.',
-      rating: 4,
-      date: 'March 5, 2025',
-      verified: true,
-      title: 'Elegant and practical',
-      comment: 'Love the minimalist design. Only giving 4 stars because I wish the mugs were slightly larger. Otherwise, perfect!',
-      helpful: 28
-    }
-  ];
 
   const handleQuantityChange = (change) => {
     const newQuantity = quantity + change;
@@ -55,7 +26,6 @@ const ProductDetailsPage = () => {
     }
   };
 
-  const averageRating = reviews.rating;
   const ratingDistribution = [
     { stars: 5, percentage: 75 },
     { stars: 4, percentage: 15 },
@@ -79,6 +49,44 @@ const ProductDetailsPage = () => {
 
     fetchProduct();
   }, [slug]);
+
+  useEffect(() => {
+    if (!product) return;
+    const fetchReviews = async () => {
+      const token = localStorage.getItem("token");
+      try {
+        const response = await api.get(`products/${product.id}/reviews`,
+          { headers: { Token: `Bearer ${token}` } });
+          setReviews(response.data.data);
+      } catch (error) {
+        setError(error.response?.data?.errors || "Error fetching reviews:");
+      }
+    };
+    fetchReviews();
+  }, [product]);
+
+  const handleSubmitReview = async () => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      navigate("/login");
+      return;
+    }
+
+    try {
+      const res = await api.post(
+        `/products/${product.id}/reviews`,
+        { review: newReview },
+        { headers: { Token: `Bearer ${token}` } }
+      );
+
+      setReviews([res.data.data, ...reviews]);
+      setShowReviewPopup(false);
+      setNewReview({ title: "", comment: "", rating: 0 });
+    } catch (error) {
+      setError(error.response?.data?.errors || "Failed to post review");
+    }
+  };
+
 
   if (loading) {
     return (
@@ -242,15 +250,15 @@ const ProductDetailsPage = () => {
                   <Star
                     key={i}
                     className={`w-5 h-5 ${
-                      i < Math.floor(product.views_count)
+                      i < Math.floor(product.average_rating)
                         ? 'fill-yellow-400 text-yellow-400'
                         : 'text-gray-300'
                     }`}
                   />
                 ))}
               </div>
-              <span className="text-lg font-semibold">4.5</span>
-              <span className="text-gray-600">({product.views_count} reviews)</span>
+              <span className="text-lg font-semibold">{product.average_rating}</span>
+              <span className="text-gray-600">({product.review_count} reviews)</span>
             </div>
 
             {/* Price */}
@@ -412,7 +420,7 @@ const ProductDetailsPage = () => {
                 activeTab === 'reviews' ? 'text-gray-900' : 'text-gray-500 hover:text-gray-900'
               }`}
             >
-              Reviews ({product.views_count})
+              Reviews ({product.review_count})
               {activeTab === 'reviews' && (
                 <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gray-900"></div>
               )}
@@ -474,20 +482,20 @@ const ProductDetailsPage = () => {
               {/* Rating Summary */}
               <div className="grid md:grid-cols-2 gap-8 mb-8 pb-8 border-b border-gray-200">
                 <div className="text-center">
-                  <div className="text-6xl font-bold text-gray-900 mb-2">{averageRating}</div>
+                  <div className="text-6xl font-bold text-gray-900 mb-2">{product.average_rating}</div>
                   <div className="flex items-center justify-center space-x-1 mb-2">
                     {[...Array(5)].map((_, i) => (
                       <Star
                         key={i}
                         className={`w-6 h-6 ${
-                          i < Math.floor(averageRating)
+                          i < Math.floor(product.average_rating)
                             ? 'fill-yellow-400 text-yellow-400'
                             : 'text-gray-300'
                         }`}
                       />
                     ))}
                   </div>
-                  <p className="text-gray-600">Based on {product.views_count} reviews</p>
+                  <p className="text-gray-600">Based on {product.review_count} reviews</p>
                 </div>
 
                 <div className="space-y-2">
@@ -537,19 +545,70 @@ const ProductDetailsPage = () => {
                     </div>
                     <h4 className="font-semibold text-gray-900 mb-2">{review.title}</h4>
                     <p className="text-gray-700 mb-3">{review.comment}</p>
-                    <button className="text-sm text-gray-600 hover:text-gray-900">
-                      Helpful ({review.helpful})
-                    </button>
                   </div>
                 ))}
               </div>
 
-              <button className="w-full mt-6 py-3 border-2 border-gray-300 rounded-lg font-semibold text-gray-900 hover:bg-gray-50 transition-colors">
+              <button 
+                onClick={() => setShowReviewPopup(true)}
+                className="w-full mt-6 py-3 border-2 border-gray-300 rounded-lg font-semibold text-gray-900 hover:bg-gray-50 transition-colors">
                 Write a Review
               </button>
             </div>
           )}
         </div>
+
+        {showReviewPopup && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white rounded-2xl p-6 w-full max-w-md relative">
+              <button
+                onClick={() => setShowReviewPopup(false)}
+                className="absolute top-3 right-3 text-gray-500 hover:text-gray-700"
+              >
+                <X className="w-5 h-5" />
+              </button>
+
+              <h3 className="text-2xl font-bold text-gray-900 mb-4">Write a Review</h3>
+
+              {/* Rating Stars */}
+              <div className="flex items-center space-x-2 mb-4">
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <Star
+                    key={star}
+                    className={`w-6 h-6 cursor-pointer ${
+                      star <= newReview.rating
+                        ? "fill-yellow-400 text-yellow-400"
+                        : "text-gray-300"
+                    }`}
+                    onClick={() => setNewReview({ ...newReview, rating: star })}
+                  />
+                ))}
+              </div>
+
+              <input
+                type="text"
+                placeholder="Review Title"
+                value={newReview.title}
+                onChange={(e) => setNewReview({ ...newReview, title: e.target.value })}
+                className="w-full border border-gray-300 rounded-lg p-3 mb-4"
+              />
+
+              <textarea
+                placeholder="Write your review..."
+                value={newReview.comment}
+                onChange={(e) => setNewReview({ ...newReview, comment: e.target.value })}
+                className="w-full border border-gray-300 rounded-lg p-3 mb-4 h-32"
+              ></textarea>
+
+              <button
+                onClick={handleSubmitReview}
+                className="w-full bg-gray-900 text-white py-3 rounded-lg font-semibold hover:bg-gray-800 transition-colors"
+              >
+                Submit Review
+              </button>
+            </div>
+          </div>
+        )}
 
         {/* Related Products */}
         <div>
@@ -567,10 +626,10 @@ const ProductDetailsPage = () => {
                 <div className="p-4">
                   <h3 className="font-semibold text-gray-900 mb-2">{product.name}</h3>
                   <div className="flex items-center justify-between">
-                    <span className="text-xl font-bold text-gray-900">${price}</span>
+                    <span className="text-xl font-bold text-gray-900">₹{price}</span>
                     <div className="flex items-center space-x-1">
                       <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                      <span className="text-sm text-gray-600">{product.views_count}</span>
+                      <span className="text-sm text-gray-600">{product.average_rating}</span>
                     </div>
                   </div>
                 </div>

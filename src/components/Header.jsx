@@ -51,7 +51,7 @@ const Header = () => {
     <header className="sticky top-0 z-50 bg-white shadow-md">
       {/* Top bar */}
       <div className="flex justify-between items-center px-6 py-2 text-sm text-gray-600 border-b bg-white">
-        <span>Free shipping on orders above ₹1499</span>
+        <span>Free shipping on orders above ₹10000</span>
         <div className="flex items-center space-x-4">
           <span>Customer Service: (0) 73541-123</span>
           <button
