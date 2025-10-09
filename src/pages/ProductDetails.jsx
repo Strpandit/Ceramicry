@@ -59,8 +59,11 @@ const ProductDetailsPage = () => {
           { headers: { Token: `Bearer ${token}` } });
           setReviews(response.data.data);
       } catch (error) {
-        setError(error.response?.data?.errors || "Error fetching reviews:");
-        setReviews([]);
+        setError(Array.isArray(error.response?.data?.errors)
+          ? error.response.data.errors
+          : [error.response?.data?.errors || "Error fetching reviews"]
+      );
+      setReviews([]);
       }
     };
     fetchReviews();
@@ -158,13 +161,14 @@ const ProductDetailsPage = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {error.length > 0 && (
-          <div className="bg-red-100 text-red-600 p-3 rounded mb-4">
-            {error.map((err, idx) => (
-              <p key={idx}>{err}</p>
-            ))}
-          </div>
-        )}
+      {error && error.length > 0 && (
+        <div className="bg-red-100 text-red-600 p-3 rounded mb-4">
+          {error.map((err, idx) => (
+            <p key={idx}>{typeof err === "string" ? err : JSON.stringify(err)}</p>
+          ))}
+        </div>
+      )}
+
       {/* Breadcrumb */}
       <div className="bg-white border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 py-4">
@@ -480,7 +484,7 @@ const ProductDetailsPage = () => {
 
           {activeTab === 'reviews' && (
             <div>
-            {reviews.length > 0 ? (
+            {!loading && reviews.length > 0 ? (
               <>
               {/* Rating Summary */}
               <div className="grid md:grid-cols-2 gap-8 mb-8 pb-8 border-b border-gray-200">
@@ -552,7 +556,7 @@ const ProductDetailsPage = () => {
                 ))}
               </div>
               </>
-              ) : (
+              ) : !loading && (
                 <div className="text-center py-10 bg-gray-50 rounded-lg">
                   <p className="text-gray-700 font-medium mb-3">
                     No reviews yet. Be the first to review this product! 📝
