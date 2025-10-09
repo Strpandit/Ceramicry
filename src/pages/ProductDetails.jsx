@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { X, ShoppingCart, Share2, Star, Check, Truck, Shield, RefreshCw, ChevronLeft, ChevronRight, Plus, Minus, Package } from 'lucide-react';
 import { useNavigate, useParams } from "react-router-dom";
+import { Toaster, toast } from 'react-hot-toast';
 import api from "../components/Api";
 
 const ProductDetailsPage = () => {
@@ -15,7 +16,6 @@ const ProductDetailsPage = () => {
   // const [relatedProducts, setRelatedProducts] = useState([]);
   const [quantity, setQuantity] = useState(1);
   const [activeTab, setActiveTab] = useState('description');
-  const [error, setError] = useState('')
   const staticImages = ["/img.png", "/img.png", "/img.png", "/img.png"];
 
 
@@ -40,7 +40,7 @@ const ProductDetailsPage = () => {
         const res = await api.get(`/products/${slug}`);
         setProduct(res.data.data);
       } catch (err) {
-        setError(err.response?.data?.errors || ["Something went wrong"]);
+        toast.error(err.response?.data?.errors || ["Something went wrong"]);
         setProduct(null)
       } finally {
         setLoading(false)
@@ -59,7 +59,7 @@ const ProductDetailsPage = () => {
           { headers: { Token: `Bearer ${token}` } });
           setReviews(response.data.data);
       } catch (error) {
-        setError(Array.isArray(error.response?.data?.errors)
+        toast.error(Array.isArray(error.response?.data?.errors)
           ? error.response.data.errors
           : [error.response?.data?.errors || "Error fetching reviews"]
       );
@@ -87,7 +87,7 @@ const ProductDetailsPage = () => {
       setShowReviewPopup(false);
       setNewReview({ title: "", comment: "", rating: 0 });
     } catch (error) {
-      setError(error.response?.data?.errors || "Failed to post review");
+      toast.error(error.response?.data?.errors || "Failed to post review");
     }
   };
 
@@ -132,7 +132,7 @@ const ProductDetailsPage = () => {
         { headers: { Token: `Bearer ${token}` } 
       });
     } catch(err) {
-      alert(err.response?.data?.errors || "Failed to add item to cart");
+      toast.error(err.response?.data?.errors || "Failed to add item to cart");
     } finally {
       setLoading(false)
       navigate('/cart')
@@ -150,24 +150,18 @@ const ProductDetailsPage = () => {
       try {
         await navigator.share({ title: productName, text: product.description, url: shareUrl });
       } catch (error) {
-        console.error("Error sharing product:", error);
+        toast.error("Error sharing product:", error);
       }
     } else {
       navigator.clipboard.writeText(shareUrl).then(() => {
-        console.log("Product link copied to clipboard!");
+        toast.success("Product link copied to clipboard!");
       });
     }
   };
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {error && error.length > 0 && (
-        <div className="bg-red-100 text-red-600 p-3 rounded mb-4">
-          {error.map((err, idx) => (
-            <p key={idx}>{typeof err === "string" ? err : JSON.stringify(err)}</p>
-          ))}
-        </div>
-      )}
+       <Toaster position="top-right" />
 
       {/* Breadcrumb */}
       <div className="bg-white border-b border-gray-200">
