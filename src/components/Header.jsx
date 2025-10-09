@@ -195,14 +195,16 @@ const Header = () => {
 
         {/* Mobile Account Link */}
         <div className="p-4 border-t mt-auto">
-          <NavLink
-            to="/login"
-            onClick={() => setIsMenuOpen(false)}
+          <button
+            onClick={() => {
+              setIsMenuOpen(false);
+              user ? navigate('/user-profile') :  navigate('/login')
+            }}
             className="flex items-center space-x-2 text-gray-700 hover:text-black transition-colors duration-200"
           >
             <User size={20} />
             <span>My Account</span>
-          </NavLink>
+          </button>
         </div>
       </div>
     </header>

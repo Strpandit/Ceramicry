@@ -346,68 +346,74 @@ const ProductCard = ({ product, viewMode }) => {
 
   if (viewMode === 'list') {
     return (
-      <div className="bg-white rounded-lg shadow-sm hover:shadow-lg transition-all duration-300 p-6 flex gap-6">
+      <div className="bg-white rounded-lg shadow-sm hover:shadow-lg transition-all duration-300 p-4 sm:p-6 flex gap-6">
         <div className="w-32 h-32 flex-shrink-0 bg-gradient-to-br from-gray-100 to-gray-200 rounded-lg flex items-center justify-center text-6xl">
           <a href={`/product/${product.slug}`} className="relative w-full h-full overflow-hidden group">
             <img src="/img.png" alt="product-image" className='w-full h-full object-cover' />
           </a>
         </div>
         
-        <div className="flex-1">
-          <div className="flex justify-between items-start mb-2">
-            <div>
-              {product.is_new && (
-                <span className="inline-block px-2 py-1 bg-black text-white text-xs rounded-full mb-2">NEW</span>
-              )}
-              <h3 className="text-xl font-semibold text-gray-900 mb-1">{product.name}</h3>
-              <p className="text-sm text-gray-600">{product.pieces_count} Pieces • {product.material}</p>
-            </div>
-          </div>
-          
-          <div className="flex items-center space-x-2 mb-3">
-            <div className="flex items-center">
-              {[...Array(5)].map((_, i) => (
-                <Star
-                  key={i}
-                  className={`w-4 h-4 ${
-                    i < Math.floor(product.views_count)
-                      ? 'fill-yellow-400 text-yellow-400'
-                      : 'text-gray-300'
-                  }`}
-                />
-              ))}
-            </div>
-            <span className="text-sm text-gray-600">
-              {product.rating} ({product.views_count} reviews)
-            </span>
-          </div>
-          
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-2">
-              <span className="text-2xl font-bold text-gray-900">₹{product.variants?.[0]?.price}</span>
-              {product.variants?.[0]?.original_price && (
-                <>
-                  <span className="text-lg text-gray-400 line-through">₹{product.variants?.[0]?.original_price}</span>
-                  <span className="px-2 py-1 bg-red-100 text-red-600 text-xs rounded-full font-semibold">
+        <div className="flex-1 flex flex-col justify-between">
+          <div>
+            <div className="flex justify-between items-start mb-2">
+              <div>
+                {product.is_new && (
+                  <span className="inline-block px-2 py-1 bg-black text-white text-xs rounded-full mb-2 mr-2">NEW</span>
+                )}
+                {product.variants?.[0]?.discount_percentage > 0 && (
+                  <span className="inline-block px-2 py-1 bg-red-100 text-red-600 text-xs rounded-full mb-2 ml-2 font-semibold">
                     {product.variants?.[0]?.discount_percentage}% OFF
                   </span>
-                </>
-              )}
+                )}
+                <h3 className="text-xl font-semibold text-gray-900 mb-1 break-words">{product.name}</h3>
+                <p className="text-sm text-gray-600">{product.pieces_count} Pieces • {product.material}</p>
+              </div>
+            </div>
+            
+            <div className="flex items-center space-x-2 mb-3">
+              <div className="flex items-center">
+                {[...Array(5)].map((_, i) => (
+                  <Star
+                    key={i}
+                    className={`w-4 h-4 ${
+                      i < Math.floor(product.views_count)
+                        ? 'fill-yellow-400 text-yellow-400'
+                        : 'text-gray-300'
+                    }`}
+                  />
+                ))}
+              </div>
+              <span className="text-sm text-gray-600">
+                {product.rating} ({product.views_count} reviews)
+              </span>
             </div>
           </div>
-          <div className='flex items-center justify-between my-2'>
-            <button 
-              onClick={handleAddToCart}
-              disabled={product?.variants?.[0]?.stock_quantity <= 0 || loading}
-              className={`w-full py-2 rounded-lg font-medium transition-colors flex items-center justify-center space-x-2 ${
-                product?.variants?.[0]?.stock_quantity > 0
-                  ? 'bg-gray-900 text-white hover:bg-gray-800'
-                  : 'bg-gray-300 text-red-500 cursor-not-allowed'
-              }`}
-            >
-              <ShoppingCart className="w-4 h-4" />
-              <span>{loading ? "Adding..." : product?.variants?.[0]?.stock_quantity > 0 ? 'Add to Cart' : 'Out of Stock'}</span>
-            </button>
+          
+          <div className="mt-auto">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <div className="flex items-center space-x-2">
+                <span className="text-2xl font-bold text-gray-900">₹{product.variants?.[0]?.price}</span>
+                {product.variants?.[0]?.original_price && (
+                  <>
+                    <span className="text-lg text-gray-400 line-through">₹{product.variants?.[0]?.original_price}</span>
+                  </>
+                )}
+              </div>
+            </div>
+            <div className='mt-3'>
+              <button 
+                onClick={handleAddToCart}
+                disabled={product?.variants?.[0]?.stock_quantity <= 0 || loading}
+                className={`w-full py-2 rounded-lg font-medium transition-colors flex items-center justify-center space-x-2 ${
+                  product?.variants?.[0]?.stock_quantity > 0
+                    ? 'bg-gray-900 text-white hover:bg-gray-800'
+                    : 'bg-gray-300 text-red-500 cursor-not-allowed'
+                }`}
+              >
+                <ShoppingCart className="w-4 h-4" />
+                <span>{loading ? "Adding..." : product?.variants?.[0]?.stock_quantity > 0 ? 'Add to Cart' : 'Out of Stock'}</span>
+              </button>
+            </div>
           </div>
         </div>
       </div>

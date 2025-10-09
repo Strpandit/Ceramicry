@@ -140,7 +140,7 @@ const Cart = () => {
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <div className="bg-white border-b border-gray-200 sticky top-0 z-40">
-        <div className="max-w-7xl mx-auto px-4 py-6">
+        <div className="max-w-7xl sm:max-w-auto mx-auto px-4 py-6">
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-3xl font-bold text-gray-900">Shopping Cart</h1>
@@ -153,8 +153,8 @@ const Cart = () => {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 py-8">
-        <div className="grid lg:grid-cols-3 gap-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
+        <div className="grid lg:grid-cols-3 gap-6 lg:gap-8">
           
           {/* Cart Items */}
           <div className="lg:col-span-2 space-y-4">
@@ -201,7 +201,7 @@ const Cart = () => {
                       )}
 
                       {/* Price and Quantity */}
-                      <div className="flex items-center justify-between">
+                      <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
                         <div>
                           <div className="flex items-center space-x-2 mb-1">
                             <span className="text-2xl font-bold text-gray-900">₹{(variant.price)}</span>
@@ -217,7 +217,7 @@ const Cart = () => {
                         </div>
 
                         {/* Quantity Selector */}
-                        <div className="flex items-center border border-gray-300 rounded-lg">
+                        <div className="flex items-center border border-gray-300 rounded-lg self-start">
                           <button
                             onClick={() => updateQuantity(item.id, item.qty - 1)}
                             className="p-2 hover:bg-gray-100 transition-colors disabled:cursor-not-allowed"
@@ -289,7 +289,7 @@ const Cart = () => {
 
           {/* Order Summary Sidebar */}
           <div className="lg:col-span-1">
-            <div className="bg-white rounded-lg shadow-sm p-6 sticky top-24">
+            <div className="bg-white rounded-lg shadow-sm p-6 sticky top-24 max-h-auto">
               <h2 className="text-2xl font-bold text-gray-900 mb-6">Order Summary</h2>
 
               {/* Coupon Input */}
@@ -419,13 +419,13 @@ const Cart = () => {
                   <span>Gift wrapping available at checkout</span>
                 </div>
               </div>
-            </div>
-
             {/* Continue Shopping */}
-            <button className="w-full mt-4 py-3 bg-gray-100 text-gray-900 rounded-lg font-semibold hover:bg-gray-200 transition-colors flex items-center justify-center space-x-2">
+            <button className="w-full lg:hidden md:hidden mt-4 py-3 bg-gray-100 text-gray-900 rounded-lg font-semibold hover:bg-gray-200 transition-colors flex items-center justify-center space-x-2">
               <ShoppingBag className="w-5 h-5" />
               <span>Continue Shopping</span>
             </button>
+            </div>
+
           </div>
         </div>
       </div>

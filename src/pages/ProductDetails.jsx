@@ -132,7 +132,7 @@ const ProductDetailsPage = () => {
 
     const productName = product.name;
     const slug = product.slug
-    const shareUrl = `https://ceramicry.netlify.app//product/${slug}`;
+    const shareUrl = `https://ceramicry.netlify.app/product/${slug}`;
 
     if (navigator.share) {
       try {
@@ -352,7 +352,7 @@ const ProductDetailsPage = () => {
                 <Truck className="w-6 h-6 text-gray-600 flex-shrink-0" />
                 <div>
                   <p className="font-semibold text-gray-900">Free Shipping</p>
-                  <p className="text-sm text-gray-600">On orders over $100</p>
+                  <p className="text-sm text-gray-600">On orders over ₹10000</p>
                 </div>
               </div>
               <div className="flex items-start space-x-3">
@@ -383,7 +383,7 @@ const ProductDetailsPage = () => {
         {/* Tabs Section */}
         <div className="bg-white rounded-2xl shadow-lg p-8 mb-12">
           {/* Tab Navigation */}
-          <div className="flex border-b border-gray-200 mb-8">
+          <div className="flex flex-wrap border-b border-gray-200 mb-8">
             <button
               onClick={() => setActiveTab('description')}
               className={`px-6 py-3 font-semibold transition-colors relative ${
@@ -460,9 +460,9 @@ const ProductDetailsPage = () => {
               <h3 className="text-2xl font-bold text-gray-900 mb-6">Technical Specifications</h3>
               <div className="space-y-4">
                 {Object.entries(product.specifications).map(([key, value]) => (
-                  <div key={key} className="flex border-b border-gray-200 pb-4">
-                    <div className="w-1/3 font-semibold text-gray-900">{key}</div>
-                    <div className="w-2/3 text-gray-700">{value}</div>
+                  <div key={key} className="flex flex-col sm:flex-row sm:items-start border-b border-gray-200 pb-4">
+                    <div className="sm:w-1/3 font-semibold text-gray-900 mb-1 sm:mb-0">{key}</div>
+                    <div className="sm:w-2/3 text-gray-700">{value}</div>
                   </div>
                 ))}
               </div>
@@ -520,7 +520,7 @@ const ProductDetailsPage = () => {
                             </span>
                           )}
                         </div>
-                        <div className="flex items-center space-x-1">
+                        <div className="flex items-center flex-wrap space-x-1">
                           {[...Array(5)].map((_, i) => (
                             <Star
                               key={i}
