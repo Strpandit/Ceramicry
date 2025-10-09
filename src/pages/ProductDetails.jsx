@@ -479,6 +479,8 @@ const ProductDetailsPage = () => {
 
           {activeTab === 'reviews' && (
             <div>
+            {reviews.length > 0 ? (
+              <>
               {/* Rating Summary */}
               <div className="grid md:grid-cols-2 gap-8 mb-8 pb-8 border-b border-gray-200">
                 <div className="text-center">
@@ -548,6 +550,14 @@ const ProductDetailsPage = () => {
                   </div>
                 ))}
               </div>
+              </>
+              ) : (
+                <div className="text-center py-10 bg-gray-50 rounded-lg">
+                  <p className="text-gray-700 font-medium mb-3">
+                    No reviews yet. Be the first to review this product! 📝
+                  </p>
+                </div>
+              )}
 
               <button 
                 onClick={() => setShowReviewPopup(true)}
