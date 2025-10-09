@@ -389,7 +389,7 @@ const ProductCard = ({ product, viewMode }) => {
             </div>
           </div>
           
-          <div className="mt-auto">
+          <div className="mt-auto mr-2">
             <div className="flex flex-wrap items-center justify-between gap-2">
               <div className="flex items-center space-x-2">
                 <span className="text-2xl font-bold text-gray-900">₹{product.variants?.[0]?.price}</span>

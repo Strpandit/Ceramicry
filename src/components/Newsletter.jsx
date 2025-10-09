@@ -5,7 +5,7 @@ const Newsletter = () => {
     <section className="py-12 px-8 bg-gray-950 text-white text-center">
       <h2 className="text-4xl mb-4">Stay Updated</h2>
       <p className="mb-6 mx-auto">Get the latest updates on new collections, exclusive offers, <br />and ceramic care tips.</p>
-      <div className="flex justify-center pt-4 pb-8 mx-2">
+      <div className="flex items-center justify-center pt-4 pb-8 mx-4">
         <input 
           type="email" 
           placeholder="Enter your email" 

@@ -461,7 +461,7 @@ const ProductDetailsPage = () => {
               <div className="space-y-4">
                 {Object.entries(product.specifications).map(([key, value]) => (
                   <div key={key} className="flex flex-col sm:flex-row sm:items-start border-b border-gray-200 pb-4">
-                    <div className="sm:w-1/3 font-semibold text-gray-900 mb-1 sm:mb-0">{key}</div>
+                    <div className="sm:w-1/3 font-semibold text-gray-900 mb-1 sm:mb-0">{key}:</div>
                     <div className="sm:w-2/3 text-gray-700">{value}</div>
                   </div>
                 ))}
