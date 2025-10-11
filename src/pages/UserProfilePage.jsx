@@ -7,7 +7,7 @@ import Addresses from "../components/user_profile/Addresses";
 import Payments from "../components/user_profile/Payments";
 import Notifications from "../components/user_profile/Notifications"
 import Security from '../components/user_profile/Security';
-import { User, Package, MapPin, CreditCard, Bell, Lock, LogOut } from 'lucide-react';
+import { User, Package, MapPin, CreditCard, Bell, LogOut, Shield, Calendar } from 'lucide-react';
 
 const UserProfile = () => {
   const [activeTab, setActiveTab] = useState(() => {
@@ -20,7 +20,9 @@ const UserProfile = () => {
     phone: "",
     id: null,
     status: null,
-    addresses: []
+    addresses: [],
+    created_at: null,
+    updated_at: null
   });
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -58,7 +60,9 @@ const UserProfile = () => {
         phone: user.mobile || "",
         id: user.id,
         status: user.status,
-        addresses: user.addresses || []
+        addresses: user.addresses || [],
+        created_at: user.created_at,
+        updated_at: user.updated_at
       });
 
     } catch (err) {
@@ -148,12 +152,12 @@ const UserProfile = () => {
       }, [token, userId]);
 
   const tabs = [
-    { id: 'profile', name: 'My Profile', icon: User },
-    { id: 'orders', name: 'My Orders', icon: Package },
-    { id: 'addresses', name: 'Addresses', icon: MapPin },
-    { id: 'payment', name: 'Payment Methods', icon: CreditCard },
-    { id: 'notifications', name: 'Notifications', icon: Bell },
-    { id: 'security', name: 'Security', icon: Lock }
+    { id: 'profile', name: 'Profile', icon: User, color: 'from-rose-500 to-amber-500' },
+    { id: 'orders', name: 'Orders', icon: Package, color: 'from-rose-500 to-amber-500' },
+    { id: 'addresses', name: 'Addresses', icon: MapPin, color: 'from-rose-500 to-amber-500' },
+    { id: 'payment', name: 'Payment Methods', icon: CreditCard, color: 'from-rose-500 to-amber-500' },
+    { id: 'notifications', name: 'Notifications', icon: Bell, color: 'from-rose-500 to-amber-500' },
+    { id: 'security', name: 'Security', icon: Shield, color: 'from-rose-500 to-amber-500' }
   ];
 
   const handleTabChange = (tabId) => {
@@ -174,6 +178,8 @@ const UserProfile = () => {
             setIsEditing={setIsEditing}
             updateProfile={updateProfile}
             loading={loading}
+            fetchProfile={fetchProfile}
+            userId={userId}
           />
         );
       case "orders":
@@ -195,8 +201,11 @@ const UserProfile = () => {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading profile...</p>
+          <div className="relative">
+            <div className="animate-spin rounded-full h-12 w-12 border-4 border-gray-200 border-t-blue-600 mx-auto mb-6"></div>
+          </div>
+          <h3 className="text-xl font-semibold text-gray-900 mb-2">Loading your profile</h3>
+          <p className="text-gray-600">Please wait while we fetch your information...</p>
         </div>
       </div>
     );
@@ -209,54 +218,98 @@ const UserProfile = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <div className="bg-white border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 py-6">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100">
+      {/* Hero Header */}
+      <div className="relative overflow-hidden">
+        {/* Background Pattern */}
+        <div className="absolute inset-0 bg-gradient-to-r from-rose-500 via-pink-500 to-amber-500"></div>
+        <div className="absolute inset-0 bg-black/10"></div>
+        <div className="absolute inset-0">
+          <div className="absolute top-10 left-10 w-32 h-32 bg-white/10 rounded-full blur-xl"></div>
+          <div className="absolute top-40 right-20 w-24 h-24 bg-white/10 rounded-full blur-lg"></div>
+          <div className="absolute bottom-20 left-1/4 w-16 h-16 bg-white/10 rounded-full blur-md"></div>
+        </div>
+
+        <div className="relative max-w-7xl mx-auto px-4 py-12">
           <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <div className="w-16 h-16 bg-gradient-to-br from-gray-200 to-gray-300 rounded-full flex items-center justify-center text-3xl">
-                <User />
-              </div>
-              <div>
-                <h1 className="text-2xl font-bold text-gray-900">
-                  {profileData.fullName || 'User'}
-                </h1>
-                <p className="text-gray-600">{profileData.email}</p>
+            <div className="flex items-center space-x-6">
+              {/* User Info */}
+              <div className="flex items-center space-x-6">
+                <div className="relative">
+                  <div className="w-16 h-16 bg-gradient-to-br from-white/30 to-white/10 backdrop-blur-sm rounded-full flex items-center justify-center text-4xl text-white border-2 border-white/20">
+                    <User className="w-10 h-10" />
+                  </div>
+                  {profileData.status && (
+                    <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-green-500 rounded-full border-2 border-white flex items-center justify-center">
+                      <div className="w-2 h-2 bg-white rounded-full"></div>
+                    </div>
+                  )}
+                </div>
+                <div>
+                  <h1 className="text-2xl font-bold text-white mb-2">
+                    {profileData.fullName || 'User'}
+                  </h1>
+                  <p className="text-white/80 text-md">{profileData.email}</p>
+                  <div className="flex items-center space-x-4 mt-2">
+                    <div className="flex items-center space-x-1 text-white/70">
+                      <Calendar className="w-4 h-4" />
+                      <span className="text-sm">Member since {profileData.created_at ? new Date(profileData.created_at).getFullYear() : '2025'}</span>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
-            <button
-              onClick={handleLogout}
-              className="flex items-center space-x-2 px-4 py-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-            >
-              <LogOut className="w-5 h-5" />
-              <span className="font-medium">Logout</span>
-            </button>
+
+            {/* Action Buttons */}
+            <div className="flex items-center space-x-3">
+              <button
+                onClick={handleLogout}
+                className="flex items-center space-x-2 px-4 py-2 bg-red-500/80 backdrop-blur-sm text-white rounded-xl hover:bg-red-500 transition-all duration-200"
+              >
+                <LogOut className="w-5 h-5" />
+                <span className="font-medium">Logout</span>
+              </button>
+            </div>
           </div>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 py-8">
+      <div className="max-w-7xl mx-auto px-4 py-8 -mt-8 relative z-10">
         <div className="grid lg:grid-cols-4 gap-8">
           
-          {/* Sidebar Navigation */}
-          <aside className="lg:col-span-1">
-            <div className="bg-white rounded-lg shadow-sm p-4 sticky top-4">
-              <nav className="space-y-1">
+          {/* Desktop Sidebar Navigation */}
+          <aside className="hidden lg:block lg:col-span-1">
+            <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border border-white/20 p-6 sticky top-8">
+              <h3 className="text-lg font-semibold text-gray-900 mb-6">Account Settings</h3>
+              <nav className="space-y-2">
                 {tabs.map((tab) => {
                   const Icon = tab.icon;
+                  const isActive = activeTab === tab.id;
                   return (
                     <button
                       key={tab.id}
                       onClick={() => handleTabChange(tab.id)}
-                      className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition-colors ${
-                        activeTab === tab.id
-                          ? 'bg-amber-900 text-white'
-                          : 'text-gray-700 hover:bg-gray-100'
+                      className={`w-full group relative overflow-hidden rounded-xl transition-all duration-300 ${
+                        isActive
+                          ? 'bg-gradient-to-r from-rose-500 to-amber-500 text-white shadow-lg transform scale-105'
+                          : 'text-gray-700 hover:bg-gray-50 hover:shadow-md'
                       }`}
                     >
-                      <Icon className="w-5 h-5" />
-                      <span className="font-medium">{tab.name}</span>
+                      <div className="flex items-center space-x-4 p-4">
+                        <div className={`p-2 rounded-lg transition-colors duration-200 ${
+                          isActive 
+                            ? 'bg-white/20' 
+                            : 'bg-gray-100 group-hover:bg-gray-200'
+                        }`}>
+                          <Icon className={`w-5 h-5 ${isActive ? 'text-white' : 'text-gray-600'}`} />
+                        </div>
+                        <div className="flex-1 text-left">
+                          <div className="font-medium">{tab.name}</div>
+                        </div>
+                      </div>
+                      {isActive && (
+                        <div className="absolute inset-0 bg-gradient-to-r from-rose-500 to-amber-500 opacity-10"></div>
+                      )}
                     </button>
                   );
                 })}
@@ -266,11 +319,42 @@ const UserProfile = () => {
 
           {/* Main Content */}
           <main className="lg:col-span-3">
-            <div className="bg-white rounded-lg shadow-sm p-8">
-              {renderTabContent()}
+            <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border border-white/20 overflow-hidden">
+              <div className="p-4 lg:p-8">
+                {renderTabContent()}
+              </div>
             </div>
           </main>
         </div>
+
+        {/* Mobile Bottom Navigation */}
+        <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-gray-200 z-50">
+          <div className="grid grid-cols-6 gap-1 p-2">
+            {tabs.map((tab) => {
+              const Icon = tab.icon;
+              const isActive = activeTab === tab.id;
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => handleTabChange(tab.id)}
+                  className={`flex flex-col items-center justify-center py-3 px-2 rounded-xl transition-all duration-200 ${
+                    isActive
+                      ? 'bg-gradient-to-r from-rose-500 to-amber-500 text-white shadow-lg'
+                      : 'text-gray-600 hover:bg-gray-100'
+                  }`}
+                >
+                  <Icon className={`w-5 h-5 mb-1 ${isActive ? 'text-white' : 'text-gray-600'}`} />
+                  <span className={`text-xs font-medium ${isActive ? 'text-white' : 'text-gray-600'}`}>
+                    {tab.name.split(' ')[0]}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Mobile Bottom Spacer */}
+        <div className="lg:hidden h-20"></div>
       </div>
     </div>
   );

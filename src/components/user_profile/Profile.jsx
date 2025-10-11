@@ -56,40 +56,52 @@ const Profile = ({ profileData, setProfileData, fetchProfile, userId, isEditing,
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
-        {successMessage && (
-          <div className="mb-4 p-3 bg-green-100 text-green-700 rounded">{successMessage}</div>
-        )}
+      {/* Success/Error Messages */}
+      {successMessage && (
+        <div className="mb-6 p-4 bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 text-green-700 rounded-xl flex items-center space-x-2">
+          <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+          <span className="font-medium">{successMessage}</span>
+        </div>
+      )}
 
-        {errors.length > 0 && (
-          <div className="bg-red-50 text-red-700 p-3 rounded-lg">
-            {errors.map((err, idx) => (
-              <p key={idx}>{err}</p>
-            ))}
-          </div>
-        )}
-        <h2 className="text-2xl font-bold text-gray-900">Personal Information</h2>
+      {errors.length > 0 && (
+        <div className="mb-6 p-4 bg-gradient-to-r from-red-50 to-pink-50 border border-red-200 text-red-700 rounded-xl">
+          {errors.map((err, idx) => (
+            <p key={idx} className="flex items-center space-x-2">
+              <div className="w-2 h-2 bg-red-500 rounded-full"></div>
+              <span>{err}</span>
+            </p>
+          ))}
+        </div>
+      )}
+
+      {/* Header */}
+      <div className="flex items-center justify-between mb-8">
+        <div>
+          <h2 className="text-3xl font-bold text-gray-900 mb-2">Personal Information</h2>
+          <p className="text-gray-600">Manage your personal details and preferences</p>
+        </div>
         {!isEditing ? (
           <button
             onClick={() => setIsEditing(true)}
-            className="flex items-center space-x-2 px-4 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors"
+            className="flex items-center space-x-2 px-5 py-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-xl shadow-lg hover:shadow-xl"
           >
-            <Edit className="w-4 h-4" />
-            <span>Edit Profile</span>
+            <Edit className="w-5 h-5" />
+            <span className="font-medium">Edit Profile</span>
           </button>
         ) : (
-          <div className="flex space-x-2">
+          <div className="flex space-x-3">
             <button
               onClick={handleSaveProfile}
               disabled={loading}
-              className="flex items-center space-x-2 px-4 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors"
+              className="flex items-center space-x-2 px-6 py-3 bg-gradient-to-r from-green-500 to-teal-600 text-white rounded-xl hover:from-green-600 hover:to-teal-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 disabled:opacity-50 disabled:transform-none"
             >
-              <Save className="w-4 h-4" />
-              <span>{loading ? "Saving.." : "Save"}</span>
+              <Save className="w-5 h-5" />
+              <span className="font-medium">{loading ? "Saving..." : "Save Changes"}</span>
             </button>
             <button
               onClick={handleCancel}
-              className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors"
+              className="px-6 py-3 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-all duration-200 font-medium"
             >
               Cancel
             </button>
@@ -97,43 +109,49 @@ const Profile = ({ profileData, setProfileData, fetchProfile, userId, isEditing,
         )}
       </div>
 
+      {/* Profile Form */}
       <div className="grid md:grid-cols gap-6">
-        <div>
-          <label className="block text-gray-700 font-medium mb-2">Full Name</label>
-          <input
-            type="text"
-            value={profileData?.fullName}
-            onChange={(e) => setProfileData({...profileData, fullName: e.target.value})}
-            disabled={!isEditing}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-transparent disabled:bg-gray-50 disabled:text-gray-600"
-          />
-        </div>
-
-        <div>
-          <label className="block text-gray-700 font-medium mb-2">Email</label>
-          <div className="relative">
-            <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+        <div className="space-y-6">
+          <div>
+            <label className="block text-gray-700 font-semibold mb-3 text-lg">Full Name</label>
             <input
-              type="email"
-              value={profileData.email}
-              onChange={(e) => setProfileData({...profileData, email: e.target.value})}
+              type="text"
+              value={profileData?.fullName}
+              onChange={(e) => setProfileData({...profileData, fullName: e.target.value})}
               disabled={!isEditing}
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-transparent disabled:bg-gray-50 disabled:text-gray-600"
+              className="w-full px-4 py-4 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-50 disabled:text-gray-600 transition-all duration-200 text-lg"
+              placeholder="Enter your full name"
             />
           </div>
-        </div>
 
-        <div>
-          <label className="block text-gray-700 font-medium mb-2">Phone Number</label>
-          <div className="relative">
-            <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-            <input
-              type="tel"
-              value={profileData.phone}
-              onChange={(e) => setProfileData({...profileData, phone: e.target.value})}
-              disabled={!isEditing}
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-transparent disabled:bg-gray-50 disabled:text-gray-600"
-            />
+          <div>
+            <label className="block text-gray-700 font-semibold mb-3 text-lg">Email Address</label>
+            <div className="relative">
+              <Mail className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+              <input
+                type="email"
+                value={profileData.email}
+                onChange={(e) => setProfileData({...profileData, email: e.target.value})}
+                disabled={!isEditing}
+                className="w-full pl-12 pr-4 py-4 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-50 disabled:text-gray-600 transition-all duration-200 text-lg"
+                placeholder="Enter your email"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-gray-700 font-semibold mb-3 text-lg">Phone Number</label>
+            <div className="relative">
+              <Phone className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+              <input
+                type="tel"
+                value={profileData.phone}
+                onChange={(e) => setProfileData({...profileData, phone: e.target.value})}
+                disabled={!isEditing}
+                className="w-full pl-12 pr-4 py-4 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-50 disabled:text-gray-600 transition-all duration-200 text-lg"
+                placeholder="Enter your phone number"
+              />
+            </div>
           </div>
         </div>
 
