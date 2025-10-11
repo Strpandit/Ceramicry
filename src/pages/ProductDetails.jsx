@@ -53,7 +53,6 @@ const ProductDetailsPage = () => {
   useEffect(() => {
     if (!product) return;
     const fetchReviews = async () => {
-      const token = localStorage.getItem("token");
       try {
         const response = await api.get(`products/${product.id}/reviews`);
           setReviews(response.data.data);
