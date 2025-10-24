@@ -12,6 +12,8 @@ import LoginPage from "./pages/LoginPage";
 import UserProfilePage from "./pages/UserProfilePage";
 import Cart from "./components/Cart";
 import OrderDetails from "./pages/OrderDetails";
+import OrderTrack from "./pages/OrderTrack";
+import Checkout from "./pages/Checkout";
 
 function App() {
   return (
@@ -26,7 +28,9 @@ function App() {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/user-profile" element={<UserProfilePage/>} />
         <Route path="/cart" element={<Cart />} />
-        <Route path="/order/:slug" element={<OrderDetails />} />
+        <Route path="/orders/:slug" element={<OrderDetails />} />
+        <Route path="/orders/:slug/track" element={<OrderTrack />} />
+        <Route path="/checkout" element={<Checkout />} />
       </Routes>
       <GoToTopButton />
       <Footer />

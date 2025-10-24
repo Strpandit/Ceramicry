@@ -11,6 +11,12 @@ const Cart = () => {
   const [appliedCoupon, setAppliedCoupon] = useState(null);
   const [showCouponInput, setShowCouponInput] = useState(false);
   const [availableCoupons, setAvailableCoupons] = useState([]);
+  const [addresses, setAddresses] = useState([]);
+  const [showCheckout, setShowCheckout] = useState(false);
+  const [shippingAddressId, setShippingAddressId] = useState("");
+  const [billingAddressId, setBillingAddressId] = useState("");
+  const [paymentMethod, setPaymentMethod] = useState("cash_on_delivery");
+  const [orderNotes, setOrderNotes] = useState("");
 
   const fetchAvailableCoupons = async () => {
     setLoading(true);
@@ -39,6 +45,24 @@ const Cart = () => {
       toast.error(err.response?.data?.errors);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchAddresses = async () => {
+    try {
+      const userId = localStorage.getItem("userId");
+      if (!userId) return;
+      const res = await api.get(`accounts/${userId}`);
+      const user = res.data?.data;
+      const addr = Array.isArray(user?.addresses) ? user.addresses : [];
+      setAddresses(addr);
+      const defaultShipping = addr.find(a => a.is_default) || addr[0];
+      if (defaultShipping) {
+        setShippingAddressId(String(defaultShipping.id));
+        setBillingAddressId(String(defaultShipping.id));
+      }
+    } catch (err) {
+      // silently ignore
     }
   };
 
@@ -118,6 +142,7 @@ const Cart = () => {
   useEffect(() => {
     fetchCart();
     fetchAvailableCoupons();
+    fetchAddresses();
 
     const savedCoupon = localStorage.getItem('appliedCoupon');
     if (savedCoupon) {
@@ -163,6 +188,37 @@ const Cart = () => {
   const calculateTotal = () => {
     if (appliedCoupon?.finalAmount) return appliedCoupon.finalAmount + calculateShipping();
     return calculateSubtotal() - calculateDiscount() + calculateShipping();
+  };
+
+  const handleCheckout = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        toast.error("Please login to proceed");
+        return;
+      }
+      if (!shippingAddressId || !billingAddressId) {
+        toast.error("Select shipping and billing addresses");
+        return;
+      }
+
+      const body = {
+        shipping_address_id: Number(shippingAddressId),
+        billing_address_id: Number(billingAddressId),
+        payment_method: paymentMethod,
+        notes: orderNotes || undefined,
+        offer_code: appliedCoupon?.code || undefined,
+      };
+
+      const res = await api.post('orders/checkout', body, { headers: { Token: `Bearer ${token}` } });
+      const created = res.data?.data;
+      toast.success(res.data?.message || 'Order placed successfully');
+      setShowCheckout(false);
+      // navigate to order details
+      window.location.href = `/orders/${created?.id}`;
+    } catch (err) {
+      toast.error(err.response?.data?.errors || 'Checkout failed');
+    }
   };
 
   if (loading) {
@@ -460,11 +516,53 @@ const Cart = () => {
                 </div>
               )}
 
-              {/* Checkout Button */}
-              <button className="w-full bg-gray-900 text-white py-4 rounded-lg font-semibold hover:bg-gray-800 transition-colors flex items-center justify-center space-x-2 mb-4">
-                <span>Proceed to Checkout</span>
-                <ArrowRight className="w-5 h-5" />
-              </button>
+              {/* Checkout */}
+              {!showCheckout && (
+                <a href="/checkout" className="w-full inline-flex bg-gray-900 text-white py-4 rounded-lg font-semibold hover:bg-gray-800 transition-colors items-center justify-center space-x-2 mb-4">
+                  <span>Proceed to Checkout</span>
+                  <ArrowRight className="w-5 h-5" />
+                </a>
+              )}
+
+              {showCheckout && (
+                <div className="mb-6 p-4 border rounded-lg space-y-4">
+                  <div>
+                    <label className="block text-sm text-gray-700 mb-1">Shipping Address</label>
+                    <select value={shippingAddressId} onChange={(e) => setShippingAddressId(e.target.value)} className="w-full border rounded-lg px-3 py-2">
+                      <option value="">Select address</option>
+                      {addresses.map(a => (
+                        <option key={a.id} value={a.id}>{a.name} • {a.address_line1}, {a.city} {a.pincode}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm text-gray-700 mb-1">Billing Address</label>
+                    <select value={billingAddressId} onChange={(e) => setBillingAddressId(e.target.value)} className="w-full border rounded-lg px-3 py-2">
+                      <option value="">Select address</option>
+                      {addresses.map(a => (
+                        <option key={a.id} value={a.id}>{a.name} • {a.address_line1}, {a.city} {a.pincode}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm text-gray-700 mb-1">Payment Method</label>
+                    <select value={paymentMethod} onChange={(e) => setPaymentMethod(e.target.value)} className="w-full border rounded-lg px-3 py-2">
+                      <option value="cash_on_delivery">Cash on Delivery</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm text-gray-700 mb-1">Notes</label>
+                    <textarea value={orderNotes} onChange={(e) => setOrderNotes(e.target.value)} rows="2" className="w-full border rounded-lg px-3 py-2" placeholder="Delivery instructions" />
+                  </div>
+                  {appliedCoupon?.code && (
+                    <div className="text-sm text-green-700">Offer code applied: <span className="font-semibold">{appliedCoupon.code}</span></div>
+                  )}
+                  <div className="flex gap-2">
+                    <button onClick={handleCheckout} className="flex-1 bg-gray-900 text-white py-3 rounded-lg font-semibold hover:bg-gray-800">Place Order</button>
+                    <button onClick={() => setShowCheckout(false)} className="px-4 py-3 border rounded-lg">Cancel</button>
+                  </div>
+                </div>
+              )}
 
               {/* Trust Badges */}
               <div className="space-y-3 pt-6 border-t border-gray-200">

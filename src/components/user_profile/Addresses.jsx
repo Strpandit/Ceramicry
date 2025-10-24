@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { HomeIcon, X, Edit3, Trash2, MapPin, CheckCircle } from "lucide-react";
+import { HomeIcon, X, Edit3, Trash2, MapPin, CheckCircle, Briefcase } from "lucide-react";
 import api from "../Api";
 
 const Addresses = ({ profileData, fetchProfile, userId }) => {
@@ -123,7 +123,6 @@ const Addresses = ({ profileData, fetchProfile, userId }) => {
   
   return (
     <div>
-      {/* Success/Error Messages */}
       {successMessage && (
         <div className="mb-6 p-4 bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 text-green-700 rounded-xl flex items-center space-x-2">
           <CheckCircle className="w-5 h-5" />
@@ -173,7 +172,7 @@ const Addresses = ({ profileData, fetchProfile, userId }) => {
                 <MapPin className="w-6 h-6 text-blue-600" />
               </div>
               <div className="flex-1">
-                <h3 className="text-xl font-bold text-gray-900 mb-1">{address.address_type}</h3>
+                <h3 className="text-xl font-bold text-gray-900 mb-1 capitalize">{address.address_type}</h3>
                 <p className="font-semibold text-gray-900 text-lg">{address.name}</p>
                 <p className="text-gray-600">{address.phone}</p>
               </div>
@@ -244,22 +243,98 @@ const Addresses = ({ profileData, fetchProfile, userId }) => {
 
               {/* Modal Body */}
               <div className="max-h-[60vh] overflow-y-auto px-6 py-6">
-                <div className="space-y-4">
-                  {["name", "phone", "address_line1", "address_line2", "city", "state", "pincode", "country", "address_type"].map((field) => (
-                    <div key={field}>
-                      <label className="block text-sm font-semibold text-gray-700 mb-2 capitalize">
-                        {field.replace("_", " ")}
-                      </label>
+                <div className="grid grid-cols-2 gap-3">
+                  {["name", "phone", "address_line1", "address_line2"].map((field) => (
+                    <div key={field} className="col-span-2">
                       <input
                         type="text"
                         name={field}
                         placeholder={field.replace("_", " ")}
                         value={formData[field]}
                         onChange={handleChange}
-                        className="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-colors"
+                        className="w-full capitalize rounded-lg border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-colors"
                       />
                     </div>
                   ))}
+                  {["city", "state", "pincode", "country"].map((field) => (
+                    <div key={field}>
+                      <input
+                        type="text"
+                        name={field}
+                        placeholder={field.replace("_", " ")}
+                        value={formData[field]}
+                        onChange={handleChange}
+                        className="w-full capitalize rounded-lg border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-colors"
+                      />
+                    </div>
+                  ))}
+                  <div className="col-span-2 flex gap-4 mt-2">
+                    {/* Home Option */}
+                    <label
+                      className={`flex items-center gap-2 border rounded-lg px-3 py-2 cursor-pointer transition ${
+                        formData.address_type === "home" ? "border-gray-900 bg-gray-100" : "border-gray-300"
+                      }`}
+                    >
+                      <input
+                        type="radio"
+                        name="address_type"
+                        value="home"
+                        checked={formData.address_type === "home"}
+                        onChange={(e) =>
+                          setFormData({ ...formData, address_type: e.target.value })
+                        }
+                        className="hidden"
+                      />
+                      <span className="flex items-center gap-1 text-sm">
+                        <HomeIcon className="w-4 h-4" />
+                        Home
+                      </span>
+                    </label>
+    
+                    {/* Work Option */}
+                    <label
+                      className={`flex items-center gap-2 border rounded-lg px-3 py-2 cursor-pointer transition ${
+                        formData.address_type === "work" ? "border-gray-900 bg-gray-100" : "border-gray-300"
+                      }`}
+                    >
+                      <input
+                        type="radio"
+                        name="address_type"
+                        value="work"
+                        checked={formData.address_type === "work"}
+                        onChange={(e) =>
+                          setFormData({ ...formData, address_type: e.target.value })
+                        }
+                        className="hidden"
+                      />
+                      <span className="flex items-center gap-1 text-sm">
+                        <Briefcase className="w-4 h-4" />
+                        Work
+                      </span>
+                    </label>
+    
+                    {/* Other Option */}
+                    <label
+                      className={`flex items-center gap-2 border rounded-lg px-3 py-2 cursor-pointer transition ${
+                        formData.address_type === "other" ? "border-gray-900 bg-gray-100" : "border-gray-300"
+                      }`}
+                    >
+                      <input
+                        type="radio"
+                        name="address_type"
+                        value="other"
+                        checked={formData.address_type === "other"}
+                        onChange={(e) =>
+                          setFormData({ ...formData, address_type: e.target.value })
+                        }
+                        className="hidden"
+                      />
+                      <span className="flex items-center gap-1 text-sm">
+                        <MapPin className="w-4 h-4" />
+                        Other
+                      </span>
+                    </label>
+                  </div>
 
                   <div className="flex items-center space-x-3 rounded-lg bg-gray-50 p-4">
                     <input
