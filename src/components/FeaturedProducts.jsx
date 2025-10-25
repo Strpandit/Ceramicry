@@ -1,13 +1,15 @@
 import React, {useState, useEffect} from "react";
 import { ShoppingCartIcon, Star } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useCart } from "../context/CartContext";
+import { toast } from "react-hot-toast";
 import api from "../components/Api"
 
 const FeaturedProducts = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(false);
   const [addingToCart, setAddingToCart] = useState(null);
-  // const [error, setError] = useState(false);
+  const { isProductInCart, addToCart } = useCart();
   const navigate =  useNavigate();
 
   useEffect(() => {
@@ -35,25 +37,18 @@ const FeaturedProducts = () => {
     setAddingToCart(item.id);
     try {
       const variantId = item?.variants?.[0]?.id;
+      await addToCart(item.id, variantId, 1);
+      toast.success("Item added to cart!");
 
-      await api.post(
-        "cart/add_item",
-        {
-          product_id: item.id,
-          variant_id: variantId,
-          qty: 1,
-        },
-        {
-          headers: { Token: `Bearer ${token}` },
-        }
-      );
-
-      navigate("/cart");
     } catch (err) {
-      console.error(err.response?.data?.errors || "Failed to add item to cart");
+      toast.error(err.response?.data?.errors || "Failed to add item to cart");
     } finally {
       setAddingToCart(null);
     }
+  };
+
+  const handleGoToCart = () => {
+    navigate("/cart");
   };
 
   if (loading) {
@@ -115,18 +110,28 @@ const FeaturedProducts = () => {
                 </span>
                 <span className="text-black font-bold ml-2">₹{item.variants?.[0]?.price}</span>
               </div>
-              <button
-                onClick={() => handleAddToCart(item)}
-                disabled={item?.variants?.[0]?.stock_quantity <= 0 || addingToCart === item.id}
-                className={`mt-4 py-2 px-6 space-x-2 rounded-md font-semibold text-lg flex items-center justify-center transition-all bg-black ${
-                  item?.variants?.[0]?.stock_quantity > 0
-                    ? 'bg-gray-900 text-white hover:bg-gray-800'
-                    : 'bg-gray-300 text-red-500 cursor-not-allowed'
-                }`}
-              >
-                <ShoppingCartIcon className="w-4 h-4" />
-                <span>{addingToCart === item.id ? "Adding..." : item?.variants?.[0]?.stock_quantity > 0 ? 'Add to Cart' : 'Out of Stock'}</span>
-              </button>
+              {isProductInCart(item.id) ? (
+                <button
+                  onClick={handleGoToCart}
+                  className="mt-4 py-2 px-6 space-x-2 rounded-md font-semibold text-lg flex items-center justify-center transition-all bg-yellow-500 text-white hover:bg-yellow-600"
+                >
+                  <ShoppingCartIcon className="w-4 h-4" />
+                  <span>Go to Cart</span>
+                </button>
+              ) : (
+                <button
+                  onClick={() => handleAddToCart(item)}
+                  disabled={item?.variants?.[0]?.stock_quantity <= 0 || addingToCart === item.id}
+                  className={`mt-4 py-2 px-6 space-x-2 rounded-md font-semibold text-lg flex items-center justify-center transition-all ${
+                    item?.variants?.[0]?.stock_quantity > 0
+                      ? 'bg-gray-900 text-white hover:bg-gray-800'
+                      : 'bg-gray-300 text-red-500 cursor-not-allowed'
+                  }`}
+                >
+                  <ShoppingCartIcon className="w-4 h-4" />
+                  <span>{addingToCart === item.id ? "Adding..." : item?.variants?.[0]?.stock_quantity > 0 ? 'Add to Cart' : 'Out of Stock'}</span>
+                </button>
+              )}
             </div>
           </div>
         ))}

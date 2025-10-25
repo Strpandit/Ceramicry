@@ -2,11 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { X, ShoppingCart, Share2, Star, Check, Truck, Shield, RefreshCw, ChevronLeft, ChevronRight, Plus, Minus, Package } from 'lucide-react';
 import { useNavigate, useParams } from "react-router-dom";
 import { Toaster, toast } from 'react-hot-toast';
+import { useCart } from '../context/CartContext';
 import api from "../components/Api";
 
 const ProductDetailsPage = () => {
   const navigate = useNavigate();
   const { slug } = useParams();
+  const { isProductInCart, addToCart } = useCart();
   const [product, setProduct] = useState(null);
   const [reviews, setReviews] = useState([]);
   const [showReviewPopup, setShowReviewPopup] = useState(false);
@@ -16,6 +18,7 @@ const ProductDetailsPage = () => {
   // const [relatedProducts, setRelatedProducts] = useState([]);
   const [quantity, setQuantity] = useState(1);
   const [activeTab, setActiveTab] = useState('description');
+  const [selectedVariant, setSelectedVariant] = useState(null);
   const staticImages = ["/img.png", "/img.png", "/img.png", "/img.png"];
 
 
@@ -24,6 +27,34 @@ const ProductDetailsPage = () => {
     if (newQuantity >= 1 && newQuantity <= product.pieces_count) {
       setQuantity(newQuantity);
     }
+  };
+
+  // Check if product is already in cart
+  const isProductInCartCheck = () => {
+    if (!product) return false;
+    return isProductInCart(product.id);
+  };
+
+  // Find first in-stock or fallback variant
+  const getFirstAvailableVariant = (variants) => {
+    if (!variants || !variants.length) return null;
+    let found = variants.find(v => v.stock_quantity > 0);
+    return found || variants[0];
+  };
+
+  useEffect(() => {
+    if (product && product.variants?.length > 0) {
+      const variant = getFirstAvailableVariant(product.variants);
+      if (variant) {
+        setSelectedVariant(variant);
+      }
+    }
+  }, [product]);
+
+  // On radio/label click for variant selection
+  const handleVariantSelection = (color, size) => {
+    const variant = product.variants.find(v => v.color === color && v.size === size);
+    setSelectedVariant(variant || null);
   };
 
   const ratingDistribution = [
@@ -39,6 +70,11 @@ const ProductDetailsPage = () => {
       try { 
         const res = await api.get(`/products/${slug}`);
         setProduct(res.data.data);
+        
+        // Set default variant if available
+        if (res.data.data?.variants?.[0]) {
+          setSelectedVariant(res.data.data.variants[0]);
+        }
       } catch (err) {
         toast.error(err.response?.data?.errors || ["Something went wrong"]);
         setProduct(null)
@@ -49,6 +85,7 @@ const ProductDetailsPage = () => {
 
     fetchProduct();
   }, [slug]);
+
 
   useEffect(() => {
     if (!product) return;
@@ -105,7 +142,7 @@ const ProductDetailsPage = () => {
     return <div className="w-full py-20 text-center text-gray-600">Product not found.</div>;
   }
 
-  const variant = product.variants?.[0] || {};
+  const variant = selectedVariant || product.variants?.[0] || {};
   const price = parseFloat(variant.price || 0);
   const original_price = parseFloat(variant.original_price || 0);
   const inStock = variant.stock_quantity > 0;
@@ -117,23 +154,21 @@ const ProductDetailsPage = () => {
       navigate("/login");
       return;
     }
+    // Prevent add to cart if no selectable variant
+    if (!selectedVariant || selectedVariant.stock_quantity <= 0) {
+      toast.error("Please select an in-stock variant");
+      return;
+    }
     setLoading(true);
     try {
-      const variantId = product.variants?.[0]?.id || null;
-
-      await api.post('cart/add_item',
-        {
-          product_id: product.id,
-          variant_id: variantId,
-          qty: quantity && quantity > 0 ? quantity : 1,
-        },
-        { headers: { Token: `Bearer ${token}` } 
-      });
+      const variantId = selectedVariant.id;
+      await addToCart(product.id, variantId, quantity && quantity > 0 ? quantity : 1);
+      toast.success("Item added to cart!");
+      navigate("/cart");
     } catch(err) {
       toast.error(err.response?.data?.errors || "Failed to add item to cart");
     } finally {
-      setLoading(false)
-      navigate('/cart')
+      setLoading(false);
     }
   };
 
@@ -328,15 +363,67 @@ const ProductDetailsPage = () => {
               </div>
             </div>
 
+            {/* Variant Selection */}
+            {product.variants && product.variants.length > 0 && (
+              <div className="mb-6 space-y-3">
+                <h3 className="text-sm font-semibold text-gray-900 mb-3">Select Color & Size</h3>
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
+                  {product.variants.map((variant) => (
+                    <label
+                      key={`${variant.color}-${variant.size}-${variant.id}`}
+                      className={`relative flex flex-col items-center p-2 border-2 rounded-lg cursor-pointer transition-all ${
+                        selectedVariant?.id === variant.id
+                          ? 'border-gray-900 bg-gray-50'
+                          : 'border-gray-300 hover:border-gray-400'
+                      }`}
+                    >
+                      <input
+                        type="radio"
+                        name="variant"
+                        value={`${variant.color}-${variant.size}`}
+                        checked={selectedVariant?.id === variant.id}
+                        onChange={() => handleVariantSelection(variant.color, variant.size)}
+                        className="sr-only"
+                      />
+                      {/* Color Swatch (if present) */}
+                      {variant.color && (
+                        <div
+                          className="w-8 h-8 rounded-full border-2 border-gray-300 mb-2"
+                          style={{ backgroundColor: variant.color }}
+                        ></div>
+                      )}
+                      {/* Size */}
+                      {variant.size && (
+                        <div className="text-xs text-gray-600">{variant.size}</div>
+                      )}
+                      {/* Price */}
+                      <div className="text-xs font-semibold text-gray-900 mt-1">₹{parseFloat(variant.price).toFixed(0)}</div>
+                      {/* Out of stock indicator */}
+                      {variant.stock_quantity <= 0 && <div className="absolute top-1 right-1"><div className="w-2 h-2 bg-red-500 rounded-full"></div></div>}
+                    </label>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {/* Action Buttons */}
             <div className="flex gap-4 mb-6">
-              <button 
-                onClick={handleAddToCart}
-                disabled={!inStock}
-                className="flex-1 bg-gray-900 text-white py-4 rounded-lg font-semibold hover:bg-gray-800 transition-colors flex items-center justify-center space-x-2">
-                <ShoppingCart className="w-5 h-5" />
-                <span>Add to Cart</span>
-              </button>
+              {isProductInCartCheck() ? (
+                <button 
+                  onClick={() => navigate('/cart')}
+                  className="flex-1 bg-yellow-500 text-white py-4 rounded-lg font-semibold hover:bg-yellow-600 transition-colors flex items-center justify-center space-x-2">
+                  <ShoppingCart className="w-5 h-5" />
+                  <span>Go to Cart</span>
+                </button>
+              ) : (
+                <button 
+                  onClick={handleAddToCart}
+                  disabled={!inStock || (product.variants && product.variants.length > 1 && !selectedVariant)}
+                  className="flex-1 bg-gray-900 text-white py-4 rounded-lg font-semibold hover:bg-gray-800 transition-colors flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed">
+                  <ShoppingCart className="w-5 h-5" />
+                  <span>Add to Cart</span>
+                </button>
+              )}
               <button 
                 onClick={(e) => {
                   e.preventDefault();
@@ -347,7 +434,10 @@ const ProductDetailsPage = () => {
               </button>
             </div>
 
-            <button className="w-full bg-gray-100 text-gray-900 py-4 rounded-lg font-semibold hover:bg-gray-200 transition-colors mb-6">
+            <button 
+              onClick={handleAddToCart}
+              disabled={!inStock || (product.variants && product.variants.length > 1 && !selectedVariant)}
+              className="w-full bg-gray-100 text-gray-900 py-4 rounded-lg font-semibold hover:bg-gray-200 transition-colors mb-6">
               Buy Now
             </button>
 

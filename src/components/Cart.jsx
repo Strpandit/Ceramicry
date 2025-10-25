@@ -150,24 +150,39 @@ const Cart = () => {
     }
   }, []);
 
+  useEffect(() => {
+    if (!cartItems || cartItems.length === 0) {
+      localStorage.removeItem('appliedCoupon');
+      setAppliedCoupon(null);
+    }
+  }, [cartItems]);
+
   const removeCoupon = () => {
     setAppliedCoupon(null);
     localStorage.removeItem('appliedCoupon');
     toast.success("Coupon removed!");
   };
 
+  // Utility function to get the matched variant for a given cart item
+  const getMatchedVariant = (item) => {
+    const { product, qty, total_price } = item;
+    // Can improve with variant_id in future if available
+    return product.variants.find(v => parseFloat(v.price) === parseFloat(total_price) / qty) || product.variants[0];
+  };
+
   const calculateSubtotal = () => {
     return cartItems.reduce((sum, item) => {
-      const price = parseFloat(item.product.variants[0].price);
+      const matchedVariant = getMatchedVariant(item);
+      const price = parseFloat(matchedVariant.price);
       return sum + price * item.qty;
     }, 0);
   };
 
   const calculateSavings = () => {
     return cartItems.reduce((sum, item) => {
-      const variant = item.product.variants[0];
-      const diff = variant.original_price - variant.price;
-      return sum + diff * item.qty;
+      const matchedVariant = getMatchedVariant(item);
+      const diff = parseFloat(matchedVariant.original_price || matchedVariant.price) - parseFloat(matchedVariant.price);
+      return sum + (diff > 0 ? diff : 0) * item.qty;
     }, 0);
   };
 
@@ -202,7 +217,8 @@ const Cart = () => {
         return;
       }
 
-      const body = {
+      // First call order review API to get exact order data
+      const reviewBody = {
         shipping_address_id: Number(shippingAddressId),
         billing_address_id: Number(billingAddressId),
         payment_method: paymentMethod,
@@ -210,12 +226,37 @@ const Cart = () => {
         offer_code: appliedCoupon?.code || undefined,
       };
 
-      const res = await api.post('orders/checkout', body, { headers: { Token: `Bearer ${token}` } });
-      const created = res.data?.data;
-      toast.success(res.data?.message || 'Order placed successfully');
-      setShowCheckout(false);
-      // navigate to order details
-      window.location.href = `/orders/${created?.id}`;
+      // Call order review API to get exact pricing and data
+      const reviewRes = await api.post('orders/order_review', reviewBody, { headers: { Token: `Bearer ${token}` } });
+      const reviewData = reviewRes.data?.data;
+
+      if (reviewData) {
+        // Use the exact data from review API for checkout
+        const checkoutBody = {
+          shipping_address_id: Number(shippingAddressId),
+          billing_address_id: Number(billingAddressId),
+          payment_method: paymentMethod,
+          notes: orderNotes || undefined,
+          offer_code: appliedCoupon?.code || undefined,
+          // Include any additional data from review API if needed
+          ...reviewData
+        };
+
+        const res = await api.post('orders/checkout', checkoutBody, { headers: { Token: `Bearer ${token}` } });
+        const created = res.data?.data;
+        toast.success(res.data?.message || 'Order placed successfully');
+        setShowCheckout(false);
+        // navigate to order details
+        window.location.href = `/orders/${created?.id}`;
+      } else {
+        // Fallback to original checkout if review API fails
+        const res = await api.post('orders/checkout', reviewBody, { headers: { Token: `Bearer ${token}` } });
+        const created = res.data?.data;
+        toast.success(res.data?.message || 'Order placed successfully');
+        setShowCheckout(false);
+        // navigate to order details
+        window.location.href = `/orders/${created?.id}`;
+      }
     } catch (err) {
       toast.error(err.response?.data?.errors || 'Checkout failed');
     }
@@ -272,25 +313,34 @@ const Cart = () => {
           <div className="lg:col-span-2 space-y-4">
             {cartItems.map((item) => {
               const product = item.product;
-              const variant = product.variants[0];
+              // Match the variant by price (total_price/qty) or variant id if it's ever present
+              const matchedVariant = getMatchedVariant(item);
+
               return (
                 <div key={item.id} className="bg-white rounded-lg shadow-sm p-6 hover:shadow-md transition-shadow">
                   <div className="flex gap-6">
                     {/* Product Image */}
                     <div className="w-32 h-32 flex-shrink-0 bg-gradient-to-br from-gray-100 to-gray-200 rounded-lg flex items-center justify-center text-6xl">
                       <img
-                      src="/img.png"
-                      alt={product.name}
-                      className="w-32 h-32 object-cover rounded-lg"
-                    />
+                        src="/img.png"
+                        alt={product.name}
+                        className="w-32 h-32 object-cover rounded-lg"
+                      />
                     </div>
-
                     {/* Product Details */}
                     <div className="flex-1 min-w-0">
                       <div className="flex justify-between items-start mb-2">
                         <div>
                           <a href={`/product/${product.slug}`}><h3 className="text-lg font-semibold text-gray-900 mb-1">{product.name}</h3></a>
                           <p className="text-sm text-gray-600">{product.pieces_count} Pieces • {product.material}</p>
+                          {/* Show selected variant details if available (size/color) */}
+                          {(matchedVariant.size || matchedVariant.color) && (
+                            <div className="text-xs text-gray-500 mt-1">
+                              {matchedVariant.size && <span>Size: {matchedVariant.size}</span>}
+                              {matchedVariant.size && matchedVariant.color && <span>&nbsp;|&nbsp;</span>}
+                              {matchedVariant.color && <span>Color: <span style={{background: matchedVariant.color, display:'inline-block', width:12, height:12, borderRadius:'50%', verticalAlign:'middle', marginRight:2}} /> {matchedVariant.color}</span>}
+                            </div>
+                          )}
                         </div>
                         <button
                           onClick={() => removeItem(item.id)}
@@ -303,7 +353,7 @@ const Cart = () => {
                       </div>
 
                       {/* Stock Status */}
-                      {variant.stock_quantity > 0 ? (
+                      {matchedVariant.stock_quantity > 0 ? (
                         <div className="flex items-center space-x-2 text-green-600 text-sm mb-4">
                           <Check className="w-4 h-4" />
                           <span>In Stock</span>
@@ -311,23 +361,21 @@ const Cart = () => {
                       ) : (
                         <div className="text-red-600 text-sm mb-4">Out of Stock</div>
                       )}
-
                       {/* Price and Quantity */}
                       <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
                         <div>
                           <div className="flex items-center space-x-2 mb-1">
-                            <span className="text-2xl font-bold text-gray-900">₹{(variant.price)}</span>
-                            {variant.original_price && (
-                              <span className="text-lg text-gray-400 line-through">₹{(variant.original_price)}</span>
+                            <span className="text-2xl font-bold text-gray-900">₹{parseFloat(matchedVariant.price).toLocaleString('en-IN')}</span>
+                            {matchedVariant.original_price && (
+                              <span className="text-lg text-gray-400 line-through">₹{parseFloat(matchedVariant.original_price).toLocaleString('en-IN')}</span>
                             )}
                           </div>
-                          {variant.original_price && (
+                          {matchedVariant.original_price && (
                             <p className="text-sm text-green-600 font-medium">
-                              You save ₹{(variant.original_price - variant.price)}
+                              You save ₹{(parseFloat(matchedVariant.original_price) - parseFloat(matchedVariant.price)).toLocaleString('en-IN')}
                             </p>
                           )}
                         </div>
-
                         {/* Quantity Selector */}
                         <div className="flex items-center border border-gray-300 rounded-lg self-start">
                           <button
@@ -347,13 +395,12 @@ const Cart = () => {
                           </button>
                         </div>
                       </div>
-
                       {/* Item Total */}
                       <div className="mt-4 pt-4 border-t border-gray-200">
                         <div className="flex justify-between items-center">
                           <span className="text-gray-600">Item Total:</span>
                           <span className="text-xl font-bold text-gray-900">
-                            ₹{(variant.price * item.qty)}
+                            ₹{parseFloat(item.total_price).toLocaleString('en-IN')}
                           </span>
                         </div>
                       </div>

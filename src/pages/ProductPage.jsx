@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useLocation } from "react-router-dom";
 import { Grid, List, ShoppingCart, Star, SlidersHorizontal, ChevronDown, X } from 'lucide-react';
+import { useCart } from "../context/CartContext";
+import { toast } from "react-hot-toast";
 import api from "../components/Api";
 
 const ProductsPage = () => {
@@ -311,6 +313,7 @@ const ProductsPage = () => {
 
 const ProductCard = ({ product, viewMode }) => {
   const navigate = useNavigate();
+  const { isProductInCart, addToCart } = useCart();
   const [loading, setLoading] = useState(false);
 
   const handleAddToCart = async () => {
@@ -323,25 +326,17 @@ const ProductCard = ({ product, viewMode }) => {
     setLoading(true);
     try {
       const variantId = product?.variants?.[0]?.id;
-
-      await api.post(
-        "cart/add_item",
-        {
-          product_id: product.id,
-          variant_id: variantId,
-          qty: 1,
-        },
-        {
-          headers: { Token: `Bearer ${token}` },
-        }
-      );
-
-      navigate("/cart");
+      await addToCart(product.id, variantId, 1);
+      toast.success("Item added to cart!");
     } catch (err) {
-      console.error(err.response?.data?.errors || "Failed to add item to cart");
+      toast.error(err.response?.data?.errors || "Failed to add item to cart");
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleGoToCart = () => {
+    navigate("/cart");
   };
 
   if (viewMode === 'list') {
@@ -401,18 +396,28 @@ const ProductCard = ({ product, viewMode }) => {
               </div>
             </div>
             <div className='mt-3'>
-              <button 
-                onClick={handleAddToCart}
-                disabled={product?.variants?.[0]?.stock_quantity <= 0 || loading}
-                className={`w-full py-2 rounded-lg font-medium transition-colors flex items-center justify-center space-x-2 ${
-                  product?.variants?.[0]?.stock_quantity > 0
-                    ? 'bg-gray-900 text-white hover:bg-gray-800'
-                    : 'bg-gray-300 text-red-500 cursor-not-allowed'
-                }`}
-              >
-                <ShoppingCart className="w-4 h-4" />
-                <span>{loading ? "Adding..." : product?.variants?.[0]?.stock_quantity > 0 ? 'Add to Cart' : 'Out of Stock'}</span>
-              </button>
+              {isProductInCart(product.id) ? (
+                <button 
+                  onClick={handleGoToCart}
+                  className="w-full py-2 rounded-lg font-medium transition-colors flex items-center justify-center space-x-2 bg-yellow-500 text-white hover:bg-yellow-600"
+                >
+                  <ShoppingCart className="w-4 h-4" />
+                  <span>Go to Cart</span>
+                </button>
+              ) : (
+                <button 
+                  onClick={handleAddToCart}
+                  disabled={product?.variants?.[0]?.stock_quantity <= 0 || loading}
+                  className={`w-full py-2 rounded-lg font-medium transition-colors flex items-center justify-center space-x-2 ${
+                    product?.variants?.[0]?.stock_quantity > 0
+                      ? 'bg-gray-900 text-white hover:bg-gray-800'
+                      : 'bg-gray-300 text-red-500 cursor-not-allowed'
+                  }`}
+                >
+                  <ShoppingCart className="w-4 h-4" />
+                  <span>{loading ? "Adding..." : product?.variants?.[0]?.stock_quantity > 0 ? 'Add to Cart' : 'Out of Stock'}</span>
+                </button>
+              )}
             </div>
           </div>
         </div>
@@ -471,18 +476,28 @@ const ProductCard = ({ product, viewMode }) => {
           </div>
         </div>
         
-        <button 
-          onClick={handleAddToCart}
-          disabled={product?.variants?.[0]?.stock_quantity <= 0 || loading}
-          className={`w-full py-2 rounded-lg font-medium transition-colors flex items-center justify-center space-x-2 ${
-            product?.variants?.[0]?.stock_quantity > 0
-              ? 'bg-gray-900 text-white hover:bg-gray-800'
-              : 'bg-gray-300 text-red-500 cursor-not-allowed'
-          }`}
-        >
-          <ShoppingCart className="w-4 h-4" />
-          <span>{loading ? "Adding..." : product?.variants?.[0]?.stock_quantity > 0 ? 'Add to Cart' : 'Out of Stock'}</span>
-        </button>
+        {isProductInCart(product.id) ? (
+          <button 
+            onClick={handleGoToCart}
+            className="w-full py-2 rounded-lg font-medium transition-colors flex items-center justify-center space-x-2 bg-yellow-500 text-white hover:bg-yellow-600"
+          >
+            <ShoppingCart className="w-4 h-4" />
+            <span>Go to Cart</span>
+          </button>
+        ) : (
+          <button 
+            onClick={handleAddToCart}
+            disabled={product?.variants?.[0]?.stock_quantity <= 0 || loading}
+            className={`w-full py-2 rounded-lg font-medium transition-colors flex items-center justify-center space-x-2 ${
+              product?.variants?.[0]?.stock_quantity > 0
+                ? 'bg-gray-900 text-white hover:bg-gray-800'
+                : 'bg-gray-300 text-red-500 cursor-not-allowed'
+            }`}
+          >
+            <ShoppingCart className="w-4 h-4" />
+            <span>{loading ? "Adding..." : product?.variants?.[0]?.stock_quantity > 0 ? 'Add to Cart' : 'Out of Stock'}</span>
+          </button>
+        )}
       </div>
     </div>
   );

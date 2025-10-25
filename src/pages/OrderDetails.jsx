@@ -53,8 +53,8 @@ const OrderDetails = () => {
     }
   }, [order]);
 
-  const canCancel = order?.can_cancel;
-  const canReturn = order?.can_return;
+  const canCancel = order?.can_be_cancelled ?? (order?.status && ['pending', 'confirmed', 'processing'].includes(order.status));
+  const canReturn = order?.can_be_returned ?? (order?.status === 'delivered');
 
   const handleCancel = async () => {
     if (!order) return;
@@ -72,9 +72,10 @@ const OrderDetails = () => {
   };
 
   const handleReturn = async () => {
+    if (!order) return;
     try {
       const token = localStorage.getItem('token');
-      const res = await api.patch(`orders/${order.id}/return`, { notes: 'Customer requested return' }, { headers: { Token: `Bearer ${token}` } });
+      const res = await api.patch(`orders/${order.id}/request_return`, { notes: 'Customer requested return' }, { headers: { Token: `Bearer ${token}` } });
       setOrder(res.data?.data);
       toast.success(res.data?.message || 'Return requested');
     } catch (err) {
@@ -123,8 +124,8 @@ const OrderDetails = () => {
                 <Download className="w-4 h-4" />
                 <span>Download Invoice</span>
               </button>
-              <span className={`px-4 py-2 rounded-full text-sm font-semibold ${getStatusBadge}`}>
-                {order.status_display || order.status}
+              <span className={`px-4 py-2 rounded-full text-sm font-semibold capitalize ${getStatusBadge}`}>
+                {(order.status_display || order.status).replace("_", " ")}
               </span>
             </div>
           </div>
@@ -278,11 +279,11 @@ const OrderDetails = () => {
                 <div className="space-y-2 text-sm">
                   <div className="flex justify-between">
                     <span className="text-gray-600">Method</span>
-                    <span className="font-medium text-gray-900">{order.payment_method}</span>
+                    <span className="font-medium text-gray-900 capitalize">{(order.payment_method).replace("_", " ")}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-600">Payment Status</span>
-                    <span className="px-2 py-1 bg-gray-100 text-gray-700 text-xs font-semibold rounded-full">{order.payment_status}</span>
+                    <span className="px-2 py-1 bg-gray-100 text-gray-700 text-xs font-semibold rounded-full capitalize">{(order.payment_status).replace("_", " ")}</span>
                   </div>
                 </div>
               </div>

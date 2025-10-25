@@ -87,7 +87,7 @@ const Orders = () => {
             <div>
               <p className="text-green-600 font-medium">Delivered</p>
               <p className="text-2xl font-bold text-green-900">
-                {orders.filter(o => o.status === 'Delivered').length}
+                {orders.filter(o => o.status === 'delivered').length}
               </p>
             </div>
             <CheckCircle className="w-8 h-8 text-green-600" />
@@ -99,7 +99,7 @@ const Orders = () => {
             <div>
               <p className="text-yellow-600 font-medium">Processing</p>
               <p className="text-2xl font-bold text-yellow-900">
-                {orders.filter(o => o.status === 'Processing').length}
+                {orders.filter(o => o.status === 'processing').length}
               </p>
             </div>
             <Clock className="w-8 h-8 text-yellow-600" />
@@ -111,7 +111,7 @@ const Orders = () => {
             <div>
               <p className="text-purple-600 font-medium">In Transit</p>
               <p className="text-2xl font-bold text-purple-900">
-                {orders.filter(o => o.status === 'In Transit').length}
+                {orders.filter(o => o.status === 'out_for_delivery').length}
               </p>
             </div>
             <Truck className="w-8 h-8 text-purple-600" />
@@ -140,7 +140,7 @@ const Orders = () => {
               <div className="flex items-center space-x-2">
                 <span className={`px-4 py-2 rounded-full text-sm font-semibold border flex items-center space-x-2 ${getStatusColor(order.status_display || order.status)}`}>
                   {getStatusIcon(order.status_display || order.status)}
-                  <span>{order.status_display || order.status}</span>
+                  <span>{(order.status_display || order.status).replace("_", " ")}</span>
                 </span>
               </div>
             </div>
@@ -208,7 +208,7 @@ const Orders = () => {
           </div>
           <h3 className="text-xl font-semibold text-gray-900 mb-2">No orders yet</h3>
           <p className="text-gray-600 mb-6">Your order history will appear here once you make your first purchase.</p>
-          <button className="px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-xl hover:from-blue-600 hover:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
+          <button onClick={() => navigate("/product")} className="px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-xl hover:from-blue-600 hover:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
             Start Shopping
           </button>
         </div>

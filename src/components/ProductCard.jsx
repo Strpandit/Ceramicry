@@ -1,10 +1,12 @@
 import React, {useState} from "react";
 import { ShoppingCartIcon, CheckCircleIcon, Loader2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import api from "../components/Api";
+import { useCart } from "../context/CartContext";
+import { toast } from "react-hot-toast";
 
 const ProductCard = ({ product }) => {
   const navigate = useNavigate();
+  const { isProductInCart, addToCart } = useCart();
   const [loading, setLoading] = useState(false);
   const [added, setAdded] = useState(false);
 
@@ -19,27 +21,24 @@ const ProductCard = ({ product }) => {
       navigate("/login");
       return;
     }
+    
     setLoading(true);
     setAdded(false);
 
     try {
       const variantId = product.variants?.[0]?.id || null;
-
-      await api.post('cart/add_item',
-        {
-          product_id: product.id,
-          variant_id: variantId,
-          qty: 1,
-        },
-        { headers: { Token: `Bearer ${token}` } }
-      );
+      await addToCart(product.id, variantId, 1);
       setAdded(true);
-      // if (onAddToCart) onAddToCart(product.id, variantId);
+      toast.success("Item added to cart!");
     } catch(err) {
-      console.log(err.response?.data?.errors || "Failed to add item to cart");
+      toast.error(err.response?.data?.errors || "Failed to add item to cart");
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
+  };
+
+  const handleGoToCart = () => {
+    navigate('/cart');
   };
 
   return (
@@ -71,19 +70,28 @@ const ProductCard = ({ product }) => {
               ₹{product.price}
             </span>
           </div>
-          <button
-            onClick={handleAddToCart}
-            disabled={loading || added}
-            className={`bg-teal-600 text-white p-2 rounded-full hover:bg-teal-700 transition flex items-center justify-center`}
-          >
-            {loading ? (
-              <Loader2 className="w-5 h-5 animate-spin" />
-            ) : added ? (
-              <CheckCircleIcon className="w-5 h-5 text-green-400" />
-            ) : (
+          {isProductInCart(product.id) ? (
+            <button
+              onClick={handleGoToCart}
+              className="bg-yellow-500 text-white p-2 rounded-full hover:bg-yellow-600 transition flex items-center justify-center"
+            >
               <ShoppingCartIcon className="w-5 h-5" />
-            )}
-          </button>
+            </button>
+          ) : (
+            <button
+              onClick={handleAddToCart}
+              disabled={loading || added}
+              className={`bg-teal-600 text-white p-2 rounded-full hover:bg-teal-700 transition flex items-center justify-center disabled:opacity-50`}
+            >
+              {loading ? (
+                <Loader2 className="w-5 h-5 animate-spin" />
+              ) : added ? (
+                <CheckCircleIcon className="w-5 h-5 text-green-400" />
+              ) : (
+                <ShoppingCartIcon className="w-5 h-5" />
+              )}
+            </button>
+          )}
         </div>
       </div>
     </div>
