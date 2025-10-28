@@ -5,10 +5,10 @@ const Footer = () => {
 
   const footerLinks = {
     "Quick Links": [
+      { name: "Home", href: "/" },
       { name: "About Us", href: "/about" },
       { name: "Contact Us", href: "/contact" },
-      { name: "Shipping Info", href: "/shipping" },
-      { name: "Returns", href: "/return" },
+      { name: "Shipping & Returns", href: "/shipping-return" },
     ],
     Categories: [
       { name: "Dinnerware", href: "/product?category=dinnerware" },
@@ -102,15 +102,15 @@ const Footer = () => {
             <p>&copy; {new Date().getFullYear()} Ceramicry. All Rights Reserved.</p>
           </div>
           <div className="flex items-center gap-4 text-sm text-gray-600">
-            <a href="#privacy" className="hover:text-gray-900 transition-colors">
+            <a href="/privacy-policy" className="hover:text-gray-900 transition-colors">
               Privacy Policy
             </a>
             <span>•</span>
-            <a href="#terms" className="hover:text-gray-900 transition-colors">
+            <a href="terms-conditions" className="hover:text-gray-900 transition-colors">
               Terms of Service
             </a>
             <span>•</span>
-            <a href="#cookies" className="hover:text-gray-900 transition-colors">
+            <a href="/cookies-policy" className="hover:text-gray-900 transition-colors">
               Cookie Policy
             </a>
           </div>

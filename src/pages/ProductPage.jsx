@@ -2,20 +2,22 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useLocation } from "react-router-dom";
 import { Grid, List, ShoppingCart, Star, SlidersHorizontal, ChevronDown, X } from 'lucide-react';
 import { useCart } from "../context/CartContext";
-import { toast } from "react-hot-toast";
+import { Toaster, toast } from "react-hot-toast";
 import api from "../components/Api";
 
 const ProductsPage = () => {
+  const navigate = useNavigate();
   const [viewMode, setViewMode] = useState('grid');
   const [showFilters, setShowFilters] = useState(true);
   const [sortBy, setSortBy] = useState('');
   const [priceFrom, setPriceFrom] = useState('');
   const [priceTo, setPriceTo] = useState('');
-  const [selectedMaterial, setSelectedMaterial] = useState([]);
+  const [selectedMaterial, setSelectedMaterial] = useState('');
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [subcategories, setSubcategories] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [fetchError, setFetchError] = useState(null);
   const location = useLocation();
   const searchParams = new URLSearchParams(location.search);
   const initialCategory = searchParams.get("category") || "";
@@ -23,7 +25,7 @@ const ProductsPage = () => {
   const [selectedCategory, setSelectedCategory] = useState(initialCategory);
   const [selectedSubcategory, setSelectedSubcategory] = useState(initialSubcategory);
 
-  const query = searchParams.get("q");
+  const query = searchParams.get("search") || "";
 
   const materials = ['Fine Porcelain', 'Ceramic', 'Stoneware', 'Crystal', 'Stainless Steel'];
 
@@ -61,24 +63,31 @@ const ProductsPage = () => {
   };
 
   const fetchProducts = useCallback(async () => {
+    setLoading(true);
+    setFetchError(null);
     try {
-      setLoading(true);
       const params = {
         min_price: priceFrom,
         max_price: priceTo,
         sort_by: sortBy || 'featured',
       };
 
-      if (query) params.q = query;
+      if (query) params.search = query;
       if (selectedCategory) params.category = selectedCategory;
       if (selectedSubcategory) params.subcategory = selectedSubcategory;
-      if (selectedMaterial.length > 0) params.material = selectedMaterial.join(",");
+      if (selectedMaterial) params.material = selectedMaterial;
 
       const res = await api.get("products", { params });
-      setProducts(res.data.data || []);
+      if (Array.isArray(res.data?.data) && res.data.data.length > 0) {
+        setProducts(res.data.data);
+        setFetchError(null);
+      } else {
+        setProducts([]);
+        setFetchError(res.data?.errors || null);
+      }
     } catch (err) {
-      console.error("Error fetching products:", err);
       setProducts([]);
+      setFetchError("Something went wrong fetching products");
     } finally {
       setLoading(false);
     }
@@ -89,11 +98,7 @@ const ProductsPage = () => {
   }, [fetchProducts]);
   
   const handleMaterialToggle = (material) => {
-    setSelectedMaterial((prev) =>
-      prev.includes(material)
-        ? prev.filter((m) => m !== material)
-        : [...prev, material]
-    );
+    setSelectedMaterial(material);
   };
 
   const handleClearFilters = () => {
@@ -102,11 +107,16 @@ const ProductsPage = () => {
     setSelectedSubcategory('');
     setPriceFrom('');
     setPriceTo('');
-    setSelectedMaterial([]);
+    setSelectedMaterial('');
+    // Clear the search param from the URL so all products show
+    const qParams = new URLSearchParams(window.location.search);
+    qParams.delete('search');
+    window.history.replaceState({}, '', window.location.pathname + (qParams.toString() ? '?' + qParams.toString() : ''));
   };
 
   return (
     <div className="min-h-screen bg-gray-50">
+      <Toaster position="top-right" reverseOrder={false} />
       {/* Header */}
       <div className="bg-white border-b border-gray-200 sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-4 py-4">
@@ -131,6 +141,7 @@ const ProductsPage = () => {
               </button>
             </div>
           </div>
+
           {query && (
             <p className="text-gray-600 my-2">
               Showing results for <span className="font-medium text-gray-900">"{query}"</span>
@@ -177,7 +188,7 @@ const ProductsPage = () => {
           </div>
 
           {/* Active Filters */}
-          {(selectedSubcategory || selectedMaterial.length > 0) && (
+          {(selectedSubcategory || selectedMaterial) && (
             <div className="flex flex-wrap gap-2 mt-4">
               {selectedSubcategory && (
                 <span className="inline-flex items-center px-3 py-1 bg-gray-200 text-gray-800 rounded-full text-sm">
@@ -188,12 +199,12 @@ const ProductsPage = () => {
                   />
                 </span>
               )}
-              {selectedMaterial.map(material => (
-                <span key={material} className="inline-flex items-center px-3 py-1 bg-gray-200 text-gray-800 rounded-full text-sm">
-                  {material}
-                  <X className="w-4 h-4 ml-2 cursor-pointer" onClick={() => handleMaterialToggle(material)} />
+              {selectedMaterial && (
+                <span className="inline-flex items-center px-3 py-1 bg-gray-200 text-gray-800 rounded-full text-sm">
+                  {selectedMaterial}
+                  <X className="w-4 h-4 ml-2 cursor-pointer" onClick={() => setSelectedMaterial('')} />
                 </span>
-              ))}
+              )}
             </div>
           )}
         </div>
@@ -232,8 +243,10 @@ const ProductsPage = () => {
                     {materials.map(material => (
                       <label key={material} className="flex items-center space-x-2 cursor-pointer">
                         <input
-                          type="checkbox"
-                          checked={selectedMaterial.includes(material)}
+                          type="radio"
+                          name="material"
+                          value={material}
+                          checked={selectedMaterial === material}
                           onChange={() => handleMaterialToggle(material)}
                           className="w-4 h-4 text-gray-900 border-gray-300 rounded focus:ring-gray-500"
                         />
@@ -288,7 +301,11 @@ const ProductsPage = () => {
               <div className="text-center py-16">
                 <div className="text-6xl mb-4">🔍</div>
                 <h3 className="text-xl font-semibold text-gray-900 mb-2">No products found</h3>
+                {fetchError && <p className="text-red-600 mt-2">{fetchError}</p>}
                 <p className="text-gray-600">Try adjusting your filters or search query</p>
+                <button onClick={() => navigate("/product")} className="mt-4 px-4 py-2 bg-gray-800 text-white rounded-lg hover:bg-gray-900 transition-colors font-medium">
+                  Explore More
+                </button>
               </div>
             ) : (
               <div className={viewMode === 'grid' 

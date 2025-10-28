@@ -1,16 +1,6 @@
 import React, { useState } from 'react';
-import { 
-  MapPin, 
-  Phone, 
-  Mail, 
-  Clock, 
-  MessageCircle, 
-  Send,
-  CheckCircle,
-  User,
-  MessageSquare,
-  Headphones
-} from 'lucide-react';
+import { MapPin, Phone, Mail, Clock, MessageCircle, Send, CheckCircle, User, MessageSquare, Headphones} from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 const ContactPage = () => {
   const [formData, setFormData] = useState({
@@ -23,6 +13,7 @@ const ContactPage = () => {
   });
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const navigate = useNavigate();
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -349,7 +340,7 @@ const ContactPage = () => {
               <p className="text-gray-300 mb-4">
                 Check our FAQ section for instant answers to common questions about orders, shipping, and products.
               </p>
-              <button className="bg-white text-gray-900 px-4 py-2 rounded-lg font-medium hover:bg-gray-100 transition-colors duration-200">
+              <button onClick={() => navigate("/faq")} className="bg-white text-gray-900 px-4 py-2 rounded-lg font-medium hover:bg-gray-100 transition-colors duration-200">
                 Visit FAQ
               </button>
             </div>

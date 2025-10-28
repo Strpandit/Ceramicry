@@ -110,16 +110,16 @@ const Header = () => {
           <div className="relative w-full ml-8">
             <SearchBar
               placeholder="Search products..."
-              fetchSuggestions={async (q) => {
+              fetchSuggestions={async (search) => {
                 try {
-                  const res = await api.get(`products/search?q=${q}`);
+                  const res = await api.get(`products?search=${search}`);
                   return res.data?.data || [];
                 } catch (err) {
                   return [];
                 }
               }}
-              onSelect={(item) => navigate('/product')}
-              onEnter={() => navigate('/product')}
+              onSelect={(item) => navigate(`/product?search=${encodeURIComponent(item.name || item)}`)}
+              onEnter={(query) => navigate(`/product?search=${encodeURIComponent(query)}`)}
             />
           </div>
           <a href="/cart" className="relative">

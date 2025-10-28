@@ -14,6 +14,11 @@ import Cart from "./components/Cart";
 import OrderDetails from "./pages/OrderDetails";
 import OrderTrack from "./pages/OrderTrack";
 import Checkout from "./pages/Checkout";
+import ShippingPolicy from "./components/Policies/ShippingPolicy";
+import PrivacyPolicy from "./components/Policies/PrivacyPolicy";
+import FAQ from "./components/Policies/Faq";
+import TermsConditions from "./components/Policies/TermsConditions";
+import CookiesPolicy from './components/Policies/CookiesPolicy';
 
 function App() {
   return (
@@ -31,6 +36,11 @@ function App() {
         <Route path="/orders/:slug" element={<OrderDetails />} />
         <Route path="/orders/:slug/track" element={<OrderTrack />} />
         <Route path="/checkout" element={<Checkout />} />
+        <Route path="/shipping-return" element={<ShippingPolicy />} />
+        <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+        <Route path="/faq" element={<FAQ />} />
+        <Route path="/terms-conditions" element={<TermsConditions />} />
+        <Route path="/cookies-policy" element={<CookiesPolicy />} />
       </Routes>
       <GoToTopButton />
       <Footer />

@@ -96,7 +96,7 @@ const LoginPage = () => {
       password: '',
       password_confirmation: '',
       rememberMe: false,
-      agreeTerms: true
+      agreeTerms: false
     });
   };
 
@@ -264,7 +264,7 @@ const LoginPage = () => {
                         required={!isLogin}
                       />
                       <span className="text-sm text-gray-600">
-                        I agree to the <a href="/login" className="text-gray-900 underline hover:text-gray-700">Terms of Service</a> and <a href="/login" className="text-gray-900 underline hover:text-gray-700">Privacy Policy</a>
+                        I agree to the <a href="/terms-conditions" className="text-gray-900 underline hover:text-gray-700">Terms of Service</a> and <a href="/privacy-policy" className="text-gray-900 underline hover:text-gray-700">Privacy Policy</a>
                       </span>
                     </label>
                   )}
