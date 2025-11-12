@@ -5,10 +5,10 @@ const Footer = () => {
 
   const footerLinks = {
     "Quick Links": [
-      { name: "Home", href: "/" },
       { name: "About Us", href: "/about" },
       { name: "Contact Us", href: "/contact" },
       { name: "Shipping & Returns", href: "/shipping-return" },
+      { name: "Delivery Partner", href: "/agent/login" },
     ],
     Categories: [
       { name: "Dinnerware", href: "/product?category=dinnerware" },

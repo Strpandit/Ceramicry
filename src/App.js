@@ -1,5 +1,5 @@
 import React from "react";
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, useLocation } from "react-router-dom";
 import HomePage from "./pages/HomePage"
 import ContactPage from "./pages/ContactPage";
 import AboutPage from "./pages/AboutPage";
@@ -19,11 +19,18 @@ import PrivacyPolicy from "./components/Policies/PrivacyPolicy";
 import FAQ from "./components/Policies/Faq";
 import TermsConditions from "./components/Policies/TermsConditions";
 import CookiesPolicy from './components/Policies/CookiesPolicy';
+import AgentLogin from './pages/AgentLogin';
+import AgentOrders from './pages/AgentOrders';
+import AgentOrderDetails from './pages/AgentOrderDetails';
+import PaymentSuccess from './pages/PaymentSuccess';
+import PaymentFailed from './pages/PaymentFailed';
 
 function App() {
+  const location = useLocation();
+  const isAgentRoute = location.pathname.startsWith('/agent');
   return (
     <>
-      <Header />
+      {!isAgentRoute && <Header />}
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/contact" element={<ContactPage />} />
@@ -41,9 +48,14 @@ function App() {
         <Route path="/faq" element={<FAQ />} />
         <Route path="/terms-conditions" element={<TermsConditions />} />
         <Route path="/cookies-policy" element={<CookiesPolicy />} />
+        <Route path="/payment-success" element={<PaymentSuccess />} />
+        <Route path="/payment-failed" element={<PaymentFailed />} />
+        <Route path="/agent/login" element={<AgentLogin />} />
+        <Route path="/agent/orders" element={<AgentOrders />} />
+        <Route path="/agent/orders/:id" element={<AgentOrderDetails />} />
       </Routes>
-      <GoToTopButton />
-      <Footer />
+      {!isAgentRoute && <GoToTopButton />}
+      {!isAgentRoute && <Footer />}
     </>
   );
 }

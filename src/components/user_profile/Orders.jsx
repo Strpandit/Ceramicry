@@ -6,10 +6,10 @@ import api from "../Api";
 const Orders = () => {
   const navigate = useNavigate();
   const [orders, setOrders] = useState([]);
+  const [totalCount, setTotalCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
-  const [perPage] = useState(10);
-  const [total, setTotal] = useState(0);
+  const perPage = 10;
 
   useEffect(() => {
     const fetchOrders = async () => {
@@ -19,16 +19,16 @@ const Orders = () => {
         const res = await api.get(`orders?page=${page}&per_page=${perPage}`, { headers: { Token: `Bearer ${token}` } });
         const list = res.data?.data?.orders || res.data?.data || [];
         setOrders(Array.isArray(list) ? list : []);
-        const totalCount = res.data?.data?.total || list.length;
-        setTotal(totalCount);
+        setTotalCount(res.data?.pagination?.total_count ?? list.length);
       } catch (err) {
         setOrders([]);
+        setTotalCount(0);
       } finally {
         setLoading(false);
       }
     };
     fetchOrders();
-  }, [page, perPage]);
+  }, [page]);
   const getStatusColor = (status) => {
     switch (status) {
       case "Delivered": return "bg-green-100 text-green-800 border-green-200";
@@ -66,7 +66,7 @@ const Orders = () => {
     <div>
       {/* Header */}
       <div className="mb-8">
-        <h2 className="text-3xl font-bold text-gray-900 mb-2">My Orders</h2>
+        <h2 className="text-2xl font-bold text-gray-900 mb-2">My Orders</h2>
         <p className="text-gray-600">Track and manage your recent orders</p>
       </div>
 
@@ -76,7 +76,7 @@ const Orders = () => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-blue-600 font-medium">Total Orders</p>
-              <p className="text-2xl font-bold text-blue-900">{orders.length}</p>
+              <p className="text-2xl font-bold text-blue-900">{totalCount}</p>
             </div>
             <Package className="w-8 h-8 text-blue-600" />
           </div>
@@ -125,13 +125,13 @@ const Orders = () => {
           <div key={order.id} className="bg-white border-2 border-gray-100 rounded-2xl p-6 hover:shadow-xl hover:border-blue-200 transition-all duration-300 group">
             <div className="flex justify-between items-start mb-6">
               <div className="flex items-center space-x-4">
-                <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center">
-                  <Package className="w-6 h-6 text-white" />
+                <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center">
+                  <Package className="w-5 h-5 text-white" />
                 </div>
                 <div>
-                  <h3 className="text-xl font-bold text-gray-900 mb-1">Order {order.order_number || order.id}</h3>
+                  <h3 className="text-lg font-bold text-gray-900 mb-1">Order {order.order_number || order.id}</h3>
                   {order.created_at && (
-                    <p className="text-gray-600">
+                    <p className="text-gray-600 text-sm">
                       Placed on {new Date(order.created_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' })}
                     </p>
                   )}
@@ -150,7 +150,7 @@ const Orders = () => {
               {(order.order_items || []).map((oi) => (
                 <div key={oi.id} className="flex justify-between items-center p-4 bg-gray-50 rounded-xl">
                   <div className="flex items-center space-x-3">
-                    <div className="w-10 h-10 bg-gradient-to-br from-gray-200 to-gray-300 rounded-lg flex items-center justify-center">
+                    <div className="w-9 h-9 bg-gradient-to-br from-gray-200 to-gray-300 rounded-lg flex items-center justify-center">
                       <Package className="w-5 h-5 text-gray-600" />
                     </div>
                     <div>
@@ -172,7 +172,7 @@ const Orders = () => {
                 <div className="text-sm text-gray-600">{order.total_items} {order.total_items === 1 ? 'item' : 'items'}</div>
                 <div className="text-right">
                   <p className="text-sm text-gray-600">Total Amount</p>
-                  <p className="text-2xl font-bold text-gray-900">{formatPrice(parseFloat(order.total_amount))}</p>
+                  <p className="text-xl font-bold text-gray-900">{formatPrice(parseFloat(order.total_amount))}</p>
                 </div>
               </div>
               <div className="flex items-center space-x-3">
@@ -192,12 +192,12 @@ const Orders = () => {
       </div>
 
       {/* Pagination */}
-      {total > perPage && (
+      {totalCount > perPage && (
         <div className="flex items-center justify-center gap-2 mt-8">
           <button disabled={page === 1} onClick={() => setPage(p => Math.max(1, p - 1))} className="px-3 py-2 border rounded disabled:opacity-50">Prev</button>
-          <span className="text-sm text-gray-600">Page {page}</span>
-          <button disabled={orders.length < perPage} onClick={() => setPage(p => p + 1)} className="px-3 py-2 border rounded disabled:opacity-50">Next</button>
-        </div>
+          <span className="text-sm text-gray-600">Page {page} of {Math.ceil(totalCount / perPage)}</span>
+          <button disabled={page >= Math.ceil(totalCount / perPage)} onClick={() => setPage(p => p + 1)} className="px-3 py-2 border rounded disabled:opacity-50">Next</button>
+        </div> 
       )}
 
       {/* Empty State */}

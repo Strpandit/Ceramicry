@@ -93,12 +93,8 @@ const ProductDetailsPage = () => {
       try {
         const response = await api.get(`products/${product.id}/reviews`);
           setReviews(response.data.data);
-      } catch (error) {
-        toast.error(Array.isArray(error.response?.data?.errors)
-          ? error.response.data.errors
-          : [error.response?.data?.errors || "Error fetching reviews"]
-      );
-      setReviews([]);
+      } catch {
+        setReviews([]);
       }
     };
     fetchReviews();
