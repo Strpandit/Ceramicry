@@ -7,27 +7,30 @@ import api from "../components/Api";
 
 const ProductsPage = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const searchParams = new URLSearchParams(location.search);
+  const query = searchParams.get("search") || "";
   const [viewMode, setViewMode] = useState('grid');
   const [showFilters, setShowFilters] = useState(true);
   const [sortBy, setSortBy] = useState('');
   const [priceFrom, setPriceFrom] = useState('');
   const [priceTo, setPriceTo] = useState('');
   const [selectedMaterial, setSelectedMaterial] = useState('');
+  const initialCategory = searchParams.get("category") || "";
+  const initialSubcategory = searchParams.get("subcategory") || "";
+  const [selectedCategory, setSelectedCategory] = useState(initialCategory);
+  const [selectedSubcategory, setSelectedSubcategory] = useState(initialSubcategory);
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [subcategories, setSubcategories] = useState([]);
   const [loading, setLoading] = useState(false);
   const [fetchError, setFetchError] = useState(null);
-  const location = useLocation();
-  const searchParams = new URLSearchParams(location.search);
-  const initialCategory = searchParams.get("category") || "";
-  const initialSubcategory = searchParams.get("subcategory") || "";
-  const [selectedCategory, setSelectedCategory] = useState(initialCategory);
-  const [selectedSubcategory, setSelectedSubcategory] = useState(initialSubcategory);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
 
-  const query = searchParams.get("search") || "";
 
-  const materials = ['Fine Porcelain', 'Ceramic', 'Stoneware', 'Crystal', 'Stainless Steel'];
+  const materials = ['Porcelain', 'Ceramic', 'Stoneware', 'Melamine', 'Fine bone china'];
 
   useEffect(() => {
     fetchCategories();
@@ -62,14 +65,27 @@ const ProductsPage = () => {
     }
   };
 
-  const fetchProducts = useCallback(async () => {
-    setLoading(true);
-    setFetchError(null);
+  const fetchProducts = useCallback(async (reset = false) => {
+
+    if (reset) {
+      setPage(1);
+      setProducts([]);
+      setHasMore(true);
+    }
+
+    if (!hasMore && !reset) return;
+
+    const isInitialLoad = reset;
+    if (isInitialLoad) setLoading(true);
+    else setLoadingMore(true);
+
     try {
       const params = {
         min_price: priceFrom,
         max_price: priceTo,
         sort_by: sortBy || 'featured',
+        page: reset ? 1 : page,
+        per_page: 12,
       };
 
       if (query) params.search = query;
@@ -78,24 +94,51 @@ const ProductsPage = () => {
       if (selectedMaterial) params.material = selectedMaterial;
 
       const res = await api.get("products", { params });
-      if (Array.isArray(res.data?.data) && res.data.data.length > 0) {
-        setProducts(res.data.data);
-        setFetchError(null);
+      const newProducts = res.data?.data || [];
+      const pagination = res.data?.pagination;
+
+      if (reset) {
+        setProducts(newProducts);
       } else {
-        setProducts([]);
-        setFetchError(res.data?.errors || null);
+        setProducts(prev => [...prev, ...newProducts]);
+      }
+
+      if (pagination?.current_page >= pagination?.total_pages) {
+        setHasMore(false);
       }
     } catch (err) {
       setProducts([]);
       setFetchError("Something went wrong fetching products");
     } finally {
       setLoading(false);
+      setLoadingMore(false);
     }
-  }, [query, selectedCategory, selectedSubcategory, priceFrom, priceTo, selectedMaterial, sortBy]);
+  }, [query, selectedCategory, selectedSubcategory, priceFrom, priceTo, selectedMaterial, sortBy, page, hasMore]);
 
   useEffect(() => {
-    fetchProducts();
-  }, [fetchProducts]);
+    fetchProducts(true);
+  }, [
+    query, selectedCategory, selectedSubcategory,
+    priceFrom, priceTo, selectedMaterial, sortBy
+  ]);
+
+  useEffect(() => {
+    const onScroll = () => {
+      if (loadingMore || !hasMore) return;
+
+      if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 350) {
+        setPage((prev) => prev + 1);
+      }
+    };
+
+    window.addEventListener("scroll", onScroll);
+    return () => window.removeEventListener("scroll", onScroll);
+  }, [loadingMore, hasMore]);
+
+  // Fetch next page when page increments
+  useEffect(() => {
+    if (page > 1) fetchProducts(false);
+  }, [page]);
   
   const handleMaterialToggle = (material) => {
     setSelectedMaterial(material);
@@ -108,7 +151,6 @@ const ProductsPage = () => {
     setPriceFrom('');
     setPriceTo('');
     setSelectedMaterial('');
-    // Clear the search param from the URL so all products show
     const qParams = new URLSearchParams(window.location.search);
     qParams.delete('search');
     window.history.replaceState({}, '', window.location.pathname + (qParams.toString() ? '?' + qParams.toString() : ''));
@@ -308,6 +350,7 @@ const ProductsPage = () => {
                 </button>
               </div>
             ) : (
+              <>
               <div className={viewMode === 'grid' 
                 ? 'grid sm:grid-cols-2 lg:grid-cols-3 gap-6' 
                 : 'space-y-4'
@@ -320,6 +363,13 @@ const ProductsPage = () => {
                   />
                 ))}
               </div>
+              {loadingMore && (
+                <div className="py-8 text-center">
+                  <div className="animate-spin h-10 w-10 border-4 border-gray-900 border-t-transparent rounded-full mx-auto"></div>
+                  <p className="text-gray-600 mt-3">Loading more products...</p>
+                </div>
+              )}
+            </>
             )}
           </main>
         </div>
@@ -361,7 +411,7 @@ const ProductCard = ({ product, viewMode }) => {
       <div className="bg-white rounded-lg shadow-sm hover:shadow-lg transition-all duration-300 p-4 sm:p-6 flex gap-6">
         <div className="w-32 h-32 flex-shrink-0 bg-gradient-to-br from-gray-100 to-gray-200 rounded-lg flex items-center justify-center text-6xl">
           <a href={`/product/${product.slug}`} className="relative w-full h-full overflow-hidden group">
-            <img src="/img.png" alt="product-image" className='w-full h-full object-cover' />
+            <img src={product?.variants[0]?.product_images[0] || "/img.png"} alt="product-image" className='w-full h-full object-cover' />
           </a>
         </div>
         
@@ -447,7 +497,7 @@ const ProductCard = ({ product, viewMode }) => {
       <div className="relative">
         <div className="aspect-square bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center text-8xl group-hover:scale-105 transition-transform duration-300">
           <a href={`/product/${product.slug}`} className="relative w-full h-full overflow-hidden group">
-            <img src="/img.png" alt="product-image" className='w-full h-full object-cover' />
+            <img src={product?.variants[0]?.product_images[0] || "/img.png"} alt="product-image" className='w-full h-full object-cover' />
           </a>
         </div>
         

@@ -15,11 +15,11 @@ const ProductDetailsPage = () => {
   const [newReview, setNewReview] = useState({ title: "", comment: "", rating: 0 });
   const [loading, setLoading] = useState(true);
   const [selectedImage, setSelectedImage] = useState(0);
-  // const [relatedProducts, setRelatedProducts] = useState([]);
+  const [relatedProducts, setRelatedProducts] = useState([]);
   const [quantity, setQuantity] = useState(1);
   const [activeTab, setActiveTab] = useState('description');
   const [selectedVariant, setSelectedVariant] = useState(null);
-  const staticImages = ["/img.png", "/img.png", "/img.png", "/img.png"];
+  const staticImage = "/img.png";
 
 
   const handleQuantityChange = (change) => {
@@ -122,6 +122,28 @@ const ProductDetailsPage = () => {
     }
   };
 
+  useEffect(() => {
+    const fetchSimilarProducts = async () => {
+      if (!product) return;
+      
+      try {
+        const res = await api.get(`products/similar_product`, {
+          params: {
+            subcategory_id: product.subcategory.id,
+            product_id: product.id,
+          }
+        });
+        
+        setRelatedProducts(res.data.data || []);
+      } catch (err) {
+        console.error("Failed to load related products", err);
+        setRelatedProducts([]);
+      }
+    };
+
+    fetchSimilarProducts();
+  }, [product]);
+
 
   if (loading) {
     return (
@@ -142,7 +164,8 @@ const ProductDetailsPage = () => {
   const price = parseFloat(variant.price || 0);
   const original_price = parseFloat(variant.original_price || 0);
   const inStock = variant.stock_quantity > 0;
-  // const gallery = variant.product_images;
+  const gallery = variant.product_images?.length ? variant.product_images.map(img => img) : [staticImage];
+  const primaryImage = gallery[selectedImage] || staticImage;
 
   const handleAddToCart = async() => {
     const token = localStorage.getItem("token");
@@ -216,20 +239,20 @@ const ProductDetailsPage = () => {
             <div className="bg-white rounded-2xl shadow-lg overflow-hidden mb-4">
               <div className="aspect-square bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center relative group">
                 <img
-                  src={staticImages[selectedImage]}
-                  alt={`Product-${selectedImage}`}
+                  src={primaryImage}
+                  alt="Product"
                   className="object-cover w-full h-full"
                 />
                 
                 {/* Image Navigation */}
                 <button 
-                  onClick={() => setSelectedImage(prev => prev > 0 ? prev - 1 : staticImages.length - 1)}
+                  onClick={() => setSelectedImage(prev => prev > 0 ? prev - 1 : gallery.length - 1)}
                   className="absolute left-4 top-1/2 -translate-y-1/2 p-2 bg-white rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-opacity"
                 >
                   <ChevronLeft className="w-6 h-6" />
                 </button>
                 <button 
-                  onClick={() => setSelectedImage(prev => prev < staticImages.length - 1 ? prev + 1 : 0)}
+                  onClick={() => setSelectedImage(prev => prev < gallery.length - 1 ? prev + 1 : 0)}
                   className="absolute right-4 top-1/2 -translate-y-1/2 p-2 bg-white rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-opacity"
                 >
                   <ChevronRight className="w-6 h-6" />
@@ -246,7 +269,7 @@ const ProductDetailsPage = () => {
 
             {/* Thumbnail Images */}
             <div className="grid grid-cols-4 gap-3">
-              {staticImages.map((img, index) => (
+              {gallery.map((img, index) => (
                 <button
                   key={index}
                   onClick={() => setSelectedImage(index)}
@@ -706,29 +729,50 @@ const ProductDetailsPage = () => {
         {/* Related Products */}
         <div>
           <h2 className="text-3xl font-bold text-gray-900 mb-6">You May Also Like</h2>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {staticImages.map((item) => (
-              <div key={item.id} className="bg-white rounded-lg shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden group cursor-pointer">
-                <div className="aspect-square bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center text-6xl group-hover:scale-105 transition-transform duration-300">
-                  <img
-                    src={item}
-                    alt="abcss"
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-                <div className="p-4">
-                  <h3 className="font-semibold text-gray-900 mb-2">{product.name}</h3>
-                  <div className="flex items-center justify-between">
-                    <span className="text-xl font-bold text-gray-900">₹{price}</span>
-                    <div className="flex items-center space-x-1">
-                      <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                      <span className="text-sm text-gray-600">{product.average_rating}</span>
+
+          {relatedProducts.length === 0 ? (
+            <p className="text-gray-600">No similar products found.</p>
+          ) : (
+            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              {relatedProducts.map((item) => {
+                const firstVariant = item.variants?.[0];
+                const productImg = firstVariant?.product_images?.[0]?.url || staticImage;
+                return (
+                  <div
+                    key={item.id}
+                    onClick={() => navigate(`/product/${item.slug}`)}
+                    className="bg-white rounded-lg shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden group cursor-pointer"
+                  >
+                    <div className="aspect-square bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center text-6xl group-hover:scale-105 transition-transform duration-300">
+                      <img
+                        src={productImg}
+                        alt={item.name}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+
+                    <div className="p-4">
+                      <h3 className="font-semibold text-gray-900 mb-2">
+                        {item.name}
+                      </h3>
+
+                      <div className="flex items-center justify-between">
+                        <span className="text-xl font-bold text-gray-900">
+                          ₹{item.variants?.[0]?.price}
+                        </span>
+
+                        <div className="flex items-center space-x-1">
+                          <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                          <span className="text-sm text-gray-600">
+                            {item.average_rating}
+                          </span>
+                        </div>
+                      </div>
                     </div>
                   </div>
-                </div>
-              </div>
-            ))}
-          </div>
+              )})}
+            </div>
+          )}
         </div>
       </div>
     </div>

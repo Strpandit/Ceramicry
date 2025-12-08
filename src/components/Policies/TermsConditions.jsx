@@ -6,9 +6,6 @@ const TermsConditions = () => {
       <h1 className="text-4xl font-bold text-purple-700 mb-6 pb-4 border-b-4 border-purple-600">
         Terms & Conditions
       </h1>
-      <p className="text-sm text-gray-600 mb-8">
-        <strong>Last Updated:</strong> October 12, 2025
-      </p>
 
       <div className="bg-blue-50 border-l-4 border-blue-500 p-4 mb-8">
         <p className="text-gray-700">
@@ -558,10 +555,9 @@ const TermsConditions = () => {
         <div className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white p-6 rounded-lg mb-6">
           <h3 className="text-2xl font-semibold mb-4">📞 Customer Support</h3>
           <div className="space-y-2">
-            <p>Email: support@ceramicry.com</p>
-            <p>Phone: 1800-XXX-XXXX (Toll-free, Mon-Sat: 9 AM - 7 PM)</p>
-            <p>WhatsApp: +91-XXXXX-XXXXX</p>
-            <p>Address: Ceramicry Private Limited, [Complete Address]</p>
+            <p>Email: shailesh2081994@gmail.com</p>
+            <p>WhatsApp: +91 99900-21009</p>
+            <p>Address: Ceramicry Private Limited, [H-105, street no 13, jai prakash nagar, Ghonda, delhi-110053]</p>
           </div>
         </div>
 
@@ -571,11 +567,11 @@ const TermsConditions = () => {
             As per Information Technology Act, 2000 and Consumer Protection (E-Commerce) Rules, 2020
           </p>
           <div className="space-y-2">
-            <p><strong>Name:</strong> [Officer Full Name]</p>
+            <p><strong>Name:</strong> Shailesh Kumar</p>
             <p><strong>Designation:</strong> Grievance Officer</p>
-            <p><strong>Email:</strong> grievance@ceramicry.com</p>
-            <p><strong>Phone:</strong> +91-XXXXX-XXXXX</p>
-            <p><strong>Address:</strong> Ceramicry Private Limited, [Complete Address with Pin Code]</p>
+            <p><strong>Email:</strong> shailesh2081994@gmail.com</p>
+            <p><strong>Phone:</strong> +91 99900-21009</p>
+            <p><strong>Address:</strong> Ceramicry Private Limited, [H-105, street no 13, jai prakash nagar, Ghonda, delhi-110053]</p>
             <p className="text-sm text-purple-100 mt-3">
               <strong>Response Time:</strong> Acknowledgment within 24 hours | Resolution within 30 days
             </p>
@@ -586,11 +582,11 @@ const TermsConditions = () => {
           <h3 className="text-2xl font-semibold mb-4">🏢 Company Details</h3>
           <div className="space-y-2">
             <p><strong>Legal Name:</strong> Ceramicry Private Limited</p>
-            <p><strong>Registered Office:</strong> [Complete Registered Address]</p>
+            <p><strong>Registered Office:</strong> H-105, street no 13, jai prakash nagar, Ghonda, delhi-110053</p>
             <p><strong>CIN:</strong> [Corporate Identification Number]</p>
             <p><strong>GST:</strong> [GSTIN Number]</p>
             <p><strong>PAN:</strong> [PAN Number]</p>
-            <p><strong>Email:</strong> legal@ceramicry.com</p>
+            <p><strong>Email:</strong> shailesh2081994@gmail.com</p>
             <p className="text-sm text-purple-100 mt-3">
               For any legal notices or official communications, please write to the registered office address
             </p>

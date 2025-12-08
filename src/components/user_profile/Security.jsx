@@ -1,6 +1,7 @@
 import React, { useState} from 'react'
 import { Lock, Eye, EyeOff, Shield, CheckCircle, AlertTriangle, HelpCircle } from 'lucide-react';
 import api from "../Api";
+import { Toaster, toast } from 'react-hot-toast';
 
 const Security = () => {
 
@@ -8,6 +9,10 @@ const Security = () => {
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const [showDeletePopup, setShowDeletePopup] = useState(false);
+  const [deletePassword, setDeletePassword] = useState("");
+  const [deleteError, setDeleteError] = useState("");
   const [errors, setErrors] = useState([]);
   const [successMessage, setSuccessMessage] = useState("");
 
@@ -62,6 +67,42 @@ const Security = () => {
     }
   };
 
+  const deleteAccount = async () => {
+    setDeleteError("");
+
+    if (!deletePassword) {
+      setDeleteError("Enter your current password");
+      return;
+    }
+
+    setDeleting(true);
+
+    try {
+      const token = localStorage.getItem("token");
+      const userId = localStorage.getItem("userId");
+
+      const response = await api.delete(`accounts/${userId}`, {
+        headers: { Token: `Bearer ${token}` },
+        data: { password: deletePassword },
+      });
+
+      toast.success(response.data.message || "Account deleted successfully");
+
+      localStorage.clear();
+      setTimeout(() => {
+        window.location.href = "/login";
+      }, 1200);
+
+    } catch (error) {
+      setDeleteError(
+        error?.response?.data?.message || "Incorrect password"
+      );
+    } finally {
+      setDeleting(false);
+    }
+  };
+
+
   return (
     <div>
       {successMessage && (
@@ -76,7 +117,7 @@ const Security = () => {
         <h2 className="text-2xl font-bold text-gray-900 mb-2">Security Settings</h2>
         <p className="text-gray-600">Manage your account security and privacy</p>
       </div>
-
+      <Toaster />
       <div className="space-y-6">
         {/* Change Password Section */}
         <div className="bg-white border-2 border-gray-100 rounded-2xl p-6">
@@ -209,9 +250,9 @@ const Security = () => {
                 </p>
               </div>
             </div>
-            <button className="px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-xl shadow-lg hover:shadow-xl font-medium">
+            <a href="mailto:shailesh2081994@gmail.com"  className="px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-xl shadow-lg hover:shadow-xl font-medium">
               Contact Support
-            </button>
+            </a>
           </div>
         </div>
 
@@ -226,12 +267,64 @@ const Security = () => {
               </p>
             </div>
           </div>
-          <button className="px-4 py-2 bg-red-500 text-white rounded-xl shadow-lg hover:shadow-xl font-medium">
-            Delete My Account
+          <button
+            onClick={() => setShowDeletePopup(true)}
+            disabled={deleting}
+            className={`px-4 py-2 rounded-xl shadow-lg font-medium text-white 
+              ${deleting ? "bg-red-300 cursor-not-allowed" : "bg-red-500 hover:shadow-xl"}`}
+          >
+            {deleting ? "Deleting..." : "Delete My Account"}
           </button>
         </div>
       </div>
+      {showDeletePopup && (
+        <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50 px-4">
+          <div className="bg-white rounded-xl p-6 w-full max-w-sm shadow-xl">
+            
+            <h3 className="text-lg font-semibold mb-2">Confirm Account Deletion</h3>
+            <p className="text-sm text-gray-600 mb-4">
+              Enter your current password to continue.
+            </p>
+
+            <input
+              type="password"
+              value={deletePassword}
+              onChange={(e) => setDeletePassword(e.target.value)}
+              placeholder="Current Password"
+              className="w-full p-3 border rounded-lg mb-2"
+            />
+
+            {deleteError && (
+              <p className="text-red-600 text-sm mb-2">{deleteError}</p>
+            )}
+
+            <div className="flex justify-end gap-3 mt-4">
+              <button
+                onClick={() => {
+                  setShowDeletePopup(false);
+                  setDeletePassword("");
+                  setDeleteError("");
+                }}
+                className="px-4 py-2 bg-gray-200 rounded-lg"
+              >
+                Cancel
+              </button>
+
+              <button
+                onClick={deleteAccount}
+                disabled={deleting}
+                className={`px-4 py-2 rounded-lg text-white ${
+                  deleting ? "bg-red-300" : "bg-red-600"
+                }`}
+              >
+                {deleting ? "Deleting..." : "Confirm Delete"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
+
   )
 }
 

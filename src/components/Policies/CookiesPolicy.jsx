@@ -48,9 +48,6 @@ const CookiesPolicy = () => {
       <h1 className="text-4xl font-bold text-purple-700 mb-6 pb-4 border-b-4 border-purple-600">
         Cookies Policy
       </h1>
-      <p className="text-sm text-gray-600 mb-8">
-        <strong>Last Updated:</strong> October 12, 2025
-      </p>
 
       <div className="bg-blue-50 border-l-4 border-blue-500 p-4 mb-8">
         <p className="text-gray-700">
@@ -854,35 +851,11 @@ const CookiesPolicy = () => {
                 Customer Support
               </h4>
               <div className="space-y-2 text-sm">
-                <p>📧 Email: privacy@ceramicry.com</p>
-                <p>📞 Phone: 1800-XXX-XXXX (Toll-free)</p>
-                <p>💬 WhatsApp: +91-XXXXX-XXXXX</p>
+                <p>📧 Email: shailesh2081994@gmail.com</p>
+                <p>📞 Phone: +91-97178-32482</p>
+                <p>💬 WhatsApp: +91-99900-21009</p>
                 <p>⏰ Hours: Mon-Sat, 9 AM - 7 PM IST</p>
               </div>
-            </div>
-
-            <div className="bg-white bg-opacity-10 p-4 rounded-lg backdrop-blur-sm">
-              <h4 className="font-semibold text-lg mb-3 border-b border-white border-opacity-30 pb-2">
-                Data Protection Officer
-              </h4>
-              <div className="space-y-2 text-sm">
-                <p>📧 Email: dpo@ceramicry.com</p>
-                <p>📞 Phone: +91-XXXXX-XXXXX</p>
-                <p className="mt-3 text-xs text-purple-100">
-                  For data privacy concerns and cookie-related queries
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div className="mt-6 pt-6 border-t border-white border-opacity-30">
-            <h4 className="font-semibold mb-2">Registered Office:</h4>
-            <p className="text-sm">Ceramicry Private Limited</p>
-            <p className="text-sm">[Complete Registered Address]</p>
-            <p className="text-sm">[City, State - Pin Code]</p>
-            <div className="mt-3 text-sm space-y-1">
-              <p>CIN: [Corporate Identification Number]</p>
-              <p>GST: [GSTIN Number]</p>
             </div>
           </div>
         </div>

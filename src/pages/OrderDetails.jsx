@@ -136,39 +136,14 @@ const OrderDetails = () => {
         <div className="grid lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2 space-y-6">
             <div className="bg-white rounded-lg shadow-sm p-6">
-              <h2 className="text-xl font-bold text-gray-900 mb-6">Order Timeline</h2>
-              <div className="relative">
-                {(order.order_statuses || []).map((s, index) => (
-                  <div key={s.id || index} className="flex gap-4 pb-8 last:pb-0 relative">
-                    <div className="flex flex-col items-center">
-                      <div className={`w-10 h-10 rounded-full flex items-center justify-center ${s.status === 'cancelled' ? 'bg-red-500' : 'bg-green-500'}`}>
-                        <CheckCircle className="w-6 h-6 text-white" />
-                      </div>
-                      {index < (order.order_statuses?.length || 1) - 1 && (
-                        <div className={`w-0.5 h-full mt-2 ${s.status === 'cancelled' ? 'bg-red-500' : 'bg-green-500'}`}></div>
-                      )}
-                    </div>
-                    <div className="flex-1 pb-4">
-                      <div className="flex justify-between items-start mb-1">
-                        <h3 className="font-semibold text-gray-900">{s.status_display || s.status}</h3>
-                        <div className="text-sm text-gray-600">{s.created_at_time || formatDate(s.created_at)}</div>
-                      </div>
-                      <p className="text-sm text-gray-600">{s.notes}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              <div className="mt-6 pt-6 border-t border-gray-200">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-gray-600">Estimated Delivery</p>
-                    <p className="font-medium text-gray-900">{formatDate(order.estimated_delivery)}</p>
-                  </div>
-                  <Link to={`/orders/${order.id}/track`} className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors font-medium">
-                    Track Order
-                  </Link>
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-gray-600">Estimated Delivery</p>
+                  <p className="font-medium text-gray-900">{formatDate(order.estimated_delivery)}</p>
                 </div>
+                <Link to={`/orders/${order.id}/track`} className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors font-medium">
+                  Track Order
+                </Link>
               </div>
             </div>
 
@@ -308,11 +283,11 @@ const OrderDetails = () => {
                 <div className="space-y-3 text-sm">
                   <div className="flex items-center space-x-3 text-gray-600">
                     <Phone className="w-4 h-4" />
-                    <span>+91 1800-123-4567</span>
+                    <span>+91 99900-21009</span>
                   </div>
                   <div className="flex items-center space-x-3 text-gray-600">
                     <Mail className="w-4 h-4" />
-                    <span>support@ceramicry.com</span>
+                    <span>shailesh2081994@gmail.com</span>
                   </div>
                 </div>
               </div>
@@ -524,7 +499,7 @@ function generateInvoice(order) {
       pageHeight - 60
     );
     doc.text(
-      "For returns or queries, contact: support@ceramicry.com | +91 99999 99999",
+      "For returns or queries, contact: shailesh2081994@gmail.com | +91 99900-21009",
       margin,
       pageHeight - 45
     );

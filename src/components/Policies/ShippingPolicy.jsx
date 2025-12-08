@@ -3,12 +3,9 @@ import React from 'react';
 const ShippingPolicy = () => {
   return (
     <div className="max-w-4xl mx-auto p-6 bg-white">
-      <h1 className="text-4xl font-bold text-purple-700 mb-6 pb-4 border-b-4 border-purple-600">
+      <h1 className="text-center text-4xl font-bold text-purple-700 mb-6 pb-4 border-b-4 border-purple-600">
         Shipping & Return Policy
       </h1>
-      <p className="text-sm text-gray-600 mb-8">
-        <strong>Last Updated: </strong> October 12, 2025
-      </p>
 
       {/* Shipping Policy */}
       <section className="mb-10">
@@ -158,8 +155,8 @@ const ShippingPolicy = () => {
               <strong>Contact Us Within 7 Days:</strong>
               <ul className="list-disc ml-6 mt-2 space-y-1">
                 <li>Email: returns@ceramicry.com</li>
-                <li>Phone: 1800-XXX-XXXX (Toll-free)</li>
-                <li>WhatsApp: +91-XXXXX-XXXXX</li>
+                <li>Phone: +91 99900-21009</li>
+                <li>WhatsApp: +91 99900-21009</li>
                 <li>Or raise a request through your account on our website</li>
               </ul>
             </li>
@@ -294,26 +291,18 @@ const ShippingPolicy = () => {
         <h3 className="text-2xl font-semibold mb-4">📞 Contact Us</h3>
         <div className="space-y-2">
           <p><strong>Customer Support:</strong></p>
-          <p>📧 Email: support@ceramicry.com</p>
-          <p>📱 Phone: 1800-XXX-XXXX (Toll-free, Mon-Sat: 9 AM - 7 PM)</p>
-          <p>💬 WhatsApp: +91-XXXXX-XXXXX</p>
+          <p>📧 Email: shailesh2081994@gmail.com</p>
+          <p>📱 Phone: +91 99900-21009</p>
+          <p>💬 WhatsApp: +91 99900-21009</p>
           
           <div className="mt-4 pt-4 border-t border-purple-400">
             <p><strong>Grievance Officer:</strong></p>
             <p>Name: Shailesh Kumar</p>
-            <p>Email: grievance@ceramicry.com</p>
-            <p>Phone: +91-XXXXX-XXXXX</p>
+            <p>Email: shailesh2081994@gmail.com</p>
+            <p>Phone: +91 99900-21009</p>
             <p className="text-sm mt-2 text-purple-100">
               Response time: Within 48 hours (as per Consumer Protection Act, 2019)
             </p>
-          </div>
-          
-          <div className="mt-4 pt-4 border-t border-purple-400">
-            <p><strong>Registered Office:</strong></p>
-            <p>Ceramicry Private Limited</p>
-            <p>[Complete Address]</p>
-            <p>CIN: [Corporate Identification Number]</p>
-            <p>GST: [GSTIN Number]</p>
           </div>
         </div>
       </section>

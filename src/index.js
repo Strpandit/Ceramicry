@@ -5,10 +5,12 @@ import App from './App';
 import {BrowserRouter} from 'react-router-dom';
 import { UserProvider } from './context/UserContext';
 import { CartProvider } from './context/CartContext';
+import ScrollToTop from './components/ScrollToTop';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <BrowserRouter>
+    <ScrollToTop />
     <UserProvider>
       <CartProvider>
         <App />

@@ -9,10 +9,9 @@ const SearchBar = ({ placeholder = "Search...", onSelect, fetchSuggestions, onEn
   const [showSuggestions, setShowSuggestions] = useState(false);
   const inputRef = useRef();
   
-  // Always auto-focus the search input when component mounts/clears
-  useEffect(() => {
-    inputRef.current && inputRef.current.focus();
-  }, []);
+  // useEffect(() => {
+  //   inputRef.current && inputRef.current.focus();
+  // }, []);
 
   // Debounced suggestions fetch
   const fetchDebounced = useRef(

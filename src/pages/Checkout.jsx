@@ -79,8 +79,8 @@ const Checkout = () => {
 
   const subtotal = useMemo(() => {
     return cartItems.reduce((sum, item) => {
-      const price = parseFloat(item.product.variants[0].price);
-
+      const v = item.product.variants[0];
+      const price = parseFloat(v.price);
       return sum + price * item.qty;
     }, 0);
   }, [cartItems]);
@@ -99,7 +99,6 @@ const Checkout = () => {
       appliedCoupon.finalAmount != null &&
       !isNaN(appliedCoupon.finalAmount)
     ) {
-      // Use server-computed finalAmount from offers apply endpoint
       return Math.max(0, subtotal - Number(appliedCoupon.finalAmount));
     }
 
@@ -109,9 +108,8 @@ const Checkout = () => {
     return parseFloat(appliedCoupon.discount) || 0;
   }, [appliedCoupon, subtotal]);
 
-  const shippingFee = useMemo(() => (subtotal >= 10000 ? 0 : 500), [subtotal]);
+  const shippingFee = useMemo(() => (subtotal >= 10000 ? 0 : 199), [subtotal]);
   const total = useMemo(() => {
-    // If BE finalAmount provided, prefer it for subtotal-after-coupon, then add shipping locally
     const afterCoupon =
       appliedCoupon &&
       appliedCoupon.finalAmount != null &&
@@ -545,8 +543,7 @@ const Checkout = () => {
                           × {item.quantity}
                         </div>
                         <div>
-                          ₹
-                          {parseFloat(item.total_price).toLocaleString("en-IN")}
+                          ₹{parseFloat(item.total_price).toLocaleString("en-IN")}
                         </div>
                       </div>
                     ))}
@@ -556,8 +553,7 @@ const Checkout = () => {
                       <div className="flex justify-between">
                         <span>Subtotal</span>
                         <span>
-                          ₹
-                          {parseFloat(
+                          ₹{parseFloat(
                             orderReviewData.subtotal || 0
                           ).toLocaleString("en-IN")}
                         </span>
@@ -566,18 +562,16 @@ const Checkout = () => {
                         <div className="flex justify-between text-green-600">
                           <span>Discount</span>
                           <span>
-                            -₹
-                            {parseFloat(
+                            -₹{parseFloat(
                               orderReviewData.discount_amount
                             ).toLocaleString("en-IN")}
                           </span>
                         </div>
                       )}
                       <div className="flex justify-between">
-                        <span>Tax</span>
+                        <span>Tax (GST)</span>
                         <span>
-                          ₹
-                          {parseFloat(
+                          ₹{parseFloat(
                             orderReviewData.tax_amount || 0
                           ).toLocaleString("en-IN")}
                         </span>
@@ -595,8 +589,7 @@ const Checkout = () => {
                       <div className="pt-2 border-t flex justify-between font-semibold text-lg">
                         <span>Total</span>
                         <span>
-                          ₹
-                          {parseFloat(
+                          ₹{parseFloat(
                             orderReviewData.total_amount || 0
                           ).toLocaleString("en-IN")}
                         </span>
@@ -604,7 +597,6 @@ const Checkout = () => {
                     </div>
                   </div>
                 ) : (
-                  // Fallback to original display if no review data
                   <div className="space-y-3">
                     {cartItems.map((ci) => {
                       const v = ci.product.variants[0];
@@ -638,7 +630,7 @@ const Checkout = () => {
                         </div>
                       )}
 
-                      {appliedCoupon && (
+                      {appliedCoupon && ( 
                         <div className="flex justify-between text-green-600">
                           <span>Coupon ({appliedCoupon.code})</span>
 
@@ -698,13 +690,11 @@ const Checkout = () => {
 
               <div className="space-y-2 text-sm">
                 {orderReviewData ? (
-                  // Show exact data from order_review API
                   <>
                     <div className="flex justify-between">
                       <span>Subtotal</span>
                       <span>
-                        ₹
-                        {parseFloat(
+                        ₹{parseFloat(
                           orderReviewData.subtotal || 0
                         ).toLocaleString("en-IN")}
                       </span>
@@ -713,18 +703,16 @@ const Checkout = () => {
                       <div className="flex justify-between text-green-700">
                         <span>Discount</span>
                         <span>
-                          -₹
-                          {parseFloat(
+                          -₹{parseFloat(
                             orderReviewData.discount_amount
                           ).toLocaleString("en-IN")}
                         </span>
                       </div>
                     )}
                     <div className="flex justify-between">
-                      <span>Tax</span>
+                      <span>Tax (GST)</span>
                       <span>
-                        ₹
-                        {parseFloat(
+                        ₹{parseFloat(
                           orderReviewData.tax_amount || 0
                         ).toLocaleString("en-IN")}
                       </span>
@@ -739,6 +727,12 @@ const Checkout = () => {
                             ).toLocaleString("en-IN")}`}
                       </span>
                     </div>
+                    {!orderReviewData && appliedCoupon && (
+                      <div className="flex justify-between text-green-700">
+                        <span>Coupon Discount</span>
+                        <span>-₹{couponDiscount.toLocaleString("en-IN")}</span>
+                      </div>
+                    )}
                     <div className="pt-2 border-t flex justify-between font-semibold">
                       <span>Total</span>
                       <span>
@@ -750,7 +744,6 @@ const Checkout = () => {
                     </div>
                   </>
                 ) : (
-                  // Fallback to original calculation
                   <>
                     <div className="flex justify-between">
                       <span>Subtotal</span>

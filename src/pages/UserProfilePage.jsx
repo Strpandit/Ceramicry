@@ -4,10 +4,8 @@ import { useNavigate } from "react-router-dom";
 import Profile from "../components/user_profile/Profile";
 import Orders from "../components/user_profile/Orders";
 import Addresses from "../components/user_profile/Addresses";
-import Payments from "../components/user_profile/Payments";
-import Notifications from "../components/user_profile/Notifications"
 import Security from '../components/user_profile/Security';
-import { User, Package, MapPin, CreditCard, Bell, LogOut, Shield, Calendar } from 'lucide-react';
+import { User, Package, MapPin, LogOut, Shield, Calendar } from 'lucide-react';
 
 const UserProfile = () => {
   const [activeTab, setActiveTab] = useState(() => {
@@ -155,8 +153,6 @@ const UserProfile = () => {
     { id: 'profile', name: 'Profile', icon: User, color: 'from-rose-500 to-amber-500' },
     { id: 'orders', name: 'Orders', icon: Package, color: 'from-rose-500 to-amber-500' },
     { id: 'addresses', name: 'Addresses', icon: MapPin, color: 'from-rose-500 to-amber-500' },
-    { id: 'payment', name: 'Payment Methods', icon: CreditCard, color: 'from-rose-500 to-amber-500' },
-    { id: 'notifications', name: 'Notifications', icon: Bell, color: 'from-rose-500 to-amber-500' },
     { id: 'security', name: 'Security', icon: Shield, color: 'from-rose-500 to-amber-500' }
   ];
 
@@ -186,10 +182,6 @@ const UserProfile = () => {
         return <Orders orders={orders} loading={loading} />;
       case "addresses":
         return <Addresses profileData={profileData} fetchProfile={fetchProfile} userId={userId} />;
-      case "payment":
-        return <Payments userId={userId} />;
-      case "notifications":
-        return <Notifications userId={userId} />;
       case "security":
         return <Security userId={userId} />;
       default:
@@ -295,7 +287,7 @@ const UserProfile = () => {
                           : 'text-gray-700 hover:bg-gray-50 hover:shadow-md'
                       }`}
                     >
-                      <div className="flex items-center space-x-4 p-4">
+                      <div className="flex items-center space-x-4 px-4 py-2">
                         <div className={`p-2 rounded-lg transition-colors duration-200 ${
                           isActive 
                             ? 'bg-white/20' 
@@ -329,7 +321,7 @@ const UserProfile = () => {
 
         {/* Mobile Bottom Navigation */}
         <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-gray-200 z-50">
-          <div className="grid grid-cols-6 gap-1 p-2">
+          <div className="grid grid-cols-4 gap-1 p-2">
             {tabs.map((tab) => {
               const Icon = tab.icon;
               const isActive = activeTab === tab.id;

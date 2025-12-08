@@ -87,7 +87,70 @@ const Cart = () => {
     }
   };
 
-  const applyCoupon = async (code) => {
+  const getMatchedVariant = (item) => {
+    const { product, qty, total_price } = item;
+    return product.variants.find(v => parseFloat(v.price) === parseFloat(total_price) / qty) || product.variants[0];
+  };
+
+  const calculateSubtotal = () => {
+    return cartItems.reduce((sum, item) => {
+      const matchedVariant = getMatchedVariant(item);
+      const price = parseFloat(matchedVariant.price);
+      return sum + price * item.qty;
+    }, 0);
+  };
+
+  const calculateTax = () => {
+    return cartItems.reduce((sum, item) => {
+      const matchedVariant = getMatchedVariant(item);
+      const price = parseFloat(matchedVariant.price);
+      const taxRate = parseFloat(item.product.tax_rate || 0);
+      return sum + (price * taxRate / 100) * item.qty;
+    }, 0);
+  };
+
+  const calculateSavings = () => {
+    return cartItems.reduce((sum, item) => {
+      const matchedVariant = getMatchedVariant(item);
+      const diff = parseFloat(matchedVariant.original_price || matchedVariant.price) - parseFloat(matchedVariant.price);
+      return sum + (diff > 0 ? diff : 0) * item.qty;
+    }, 0);
+  };
+
+  const calculateDiscount = () => {
+    if (!appliedCoupon) return 0;
+
+    if (!appliedCoupon.type) {
+      return parseFloat(appliedCoupon.discount || 0);
+    }
+
+    if (appliedCoupon.type === '%') {
+      return (calculateSubtotal() * appliedCoupon.discount) / 100;
+    }
+
+    return parseFloat(appliedCoupon.discount) || 0;
+    };
+
+  const calculateShipping = () => {
+    const subtotal = calculateSubtotal();
+    return subtotal >= 10000 ? 0 : 199;
+  };
+
+  const calculateTotal = () => {
+    const subtotal = calculateSubtotal();
+    const tax = calculateTax();
+    const shipping = calculateShipping();
+
+    if (appliedCoupon?.finalAmount != null) {
+      return appliedCoupon.finalAmount + tax + shipping;
+    }
+
+    const discount = calculateDiscount();
+    return subtotal - discount + tax + shipping;
+  };
+
+  const applyCouponViaApi = async (code) => {
+    if (!code) return;
     try {
       const token = localStorage.getItem("token");
       const totalAmount = calculateSubtotal();
@@ -100,12 +163,15 @@ const Cart = () => {
 
       const data = res.data;
 
-      setAppliedCoupon({
+      const applied = {
         code,
         discount: data.discount,
         message: data.message,
-        finalAmount: data.final_amount,
-      });
+        finalAmount: data.final_amount
+      };
+
+      setAppliedCoupon(applied);
+      localStorage.setItem('appliedCoupon', JSON.stringify(applied));
       setCouponCode('');
       setShowCouponInput(false);
       toast.success("Coupon applied successfully! 🎉");
@@ -115,29 +181,37 @@ const Cart = () => {
     }
   };
 
-  const applyCouponLocally = (coupon) => {
-    let type = '₹';
-    let discount = coupon.discount;
-
-    if (coupon.discount < 100) {
-      type = '%';
-    } else {
-      discount = parseFloat(coupon.discount);
-    }
-
-    const applied = {
-      ...coupon,
-      discount,
-      type,
-      discountDisplay: type === '%' ? `${coupon.discount}%` : `₹${coupon.discount}`
-    };
-
-    setAppliedCoupon(applied);
-    localStorage.setItem('appliedCoupon', JSON.stringify(applied));
-    setCouponCode('');
-    setShowCouponInput(false);
-    toast.success("Coupon applied successfully! 🎉");
+  const applyCoupon = (code) => {
+    applyCouponViaApi(code);
   };
+
+  const applyCouponLocally = (coupon) => {
+    applyCouponViaApi(coupon.code);
+  };
+
+  // const applyCouponLocally = (coupon) => {
+  //   let type = '₹';
+  //   let discount = coupon.discount;
+
+  //   if (coupon.discount < 100) {
+  //     type = '%';
+  //   } else {
+  //     discount = parseFloat(coupon.discount);
+  //   }
+
+  //   const applied = {
+  //     ...coupon,
+  //     discount,
+  //     type,
+  //     discountDisplay: type === '%' ? `${coupon.discount}%` : `₹${coupon.discount}`
+  //   };
+
+  //   setAppliedCoupon(applied);
+  //   localStorage.setItem('appliedCoupon', JSON.stringify(applied));
+  //   setCouponCode('');
+  //   setShowCouponInput(false);
+  //   toast.success("Coupon applied successfully! 🎉");
+  // };
 
   useEffect(() => {
     fetchCart();
@@ -163,48 +237,6 @@ const Cart = () => {
     toast.success("Coupon removed!");
   };
 
-  // Utility function to get the matched variant for a given cart item
-  const getMatchedVariant = (item) => {
-    const { product, qty, total_price } = item;
-    // Can improve with variant_id in future if available
-    return product.variants.find(v => parseFloat(v.price) === parseFloat(total_price) / qty) || product.variants[0];
-  };
-
-  const calculateSubtotal = () => {
-    return cartItems.reduce((sum, item) => {
-      const matchedVariant = getMatchedVariant(item);
-      const price = parseFloat(matchedVariant.price);
-      return sum + price * item.qty;
-    }, 0);
-  };
-
-  const calculateSavings = () => {
-    return cartItems.reduce((sum, item) => {
-      const matchedVariant = getMatchedVariant(item);
-      const diff = parseFloat(matchedVariant.original_price || matchedVariant.price) - parseFloat(matchedVariant.price);
-      return sum + (diff > 0 ? diff : 0) * item.qty;
-    }, 0);
-  };
-
-  const calculateDiscount = () => {
-    if (!appliedCoupon) return 0;
-    if (appliedCoupon.type === '%') {
-      return (calculateSubtotal() * appliedCoupon.discount) / 100;
-    }
-
-    return parseFloat(appliedCoupon.discount) || 0;
-    };
-
-  const calculateShipping = () => {
-    const subtotal = calculateSubtotal();
-    return subtotal >= 10000 ? 0 : 500;
-  };
-
-  const calculateTotal = () => {
-    if (appliedCoupon?.finalAmount) return appliedCoupon.finalAmount + calculateShipping();
-    return calculateSubtotal() - calculateDiscount() + calculateShipping();
-  };
-
   const handleCheckout = async () => {
     try {
       const token = localStorage.getItem("token");
@@ -217,7 +249,7 @@ const Cart = () => {
         return;
       }
 
-      // First call order review API to get exact order data
+      // call order review API to get exact order data
       const reviewBody = {
         shipping_address_id: Number(shippingAddressId),
         billing_address_id: Number(billingAddressId),
@@ -231,14 +263,12 @@ const Cart = () => {
       const reviewData = reviewRes.data?.data;
 
       if (reviewData) {
-        // Use the exact data from review API for checkout
         const checkoutBody = {
           shipping_address_id: Number(shippingAddressId),
           billing_address_id: Number(billingAddressId),
           payment_method: paymentMethod,
           notes: orderNotes || undefined,
           offer_code: appliedCoupon?.code || undefined,
-          // Include any additional data from review API if needed
           ...reviewData
         };
 
@@ -246,15 +276,12 @@ const Cart = () => {
         const created = res.data?.data;
         toast.success(res.data?.message || 'Order placed successfully');
         setShowCheckout(false);
-        // navigate to order details
         window.location.href = `/orders/${created?.id}`;
       } else {
-        // Fallback to original checkout if review API fails
         const res = await api.post('orders/checkout', reviewBody, { headers: { Token: `Bearer ${token}` } });
         const created = res.data?.data;
         toast.success(res.data?.message || 'Order placed successfully');
         setShowCheckout(false);
-        // navigate to order details
         window.location.href = `/orders/${created?.id}`;
       }
     } catch (err) {
@@ -313,7 +340,6 @@ const Cart = () => {
           <div className="lg:col-span-2 space-y-4">
             {cartItems.map((item) => {
               const product = item.product;
-              // Match the variant by price (total_price/qty) or variant id if it's ever present
               const matchedVariant = getMatchedVariant(item);
 
               return (
@@ -322,7 +348,7 @@ const Cart = () => {
                     {/* Product Image */}
                     <div className="w-32 h-32 flex-shrink-0 bg-gradient-to-br from-gray-100 to-gray-200 rounded-lg flex items-center justify-center text-6xl">
                       <img
-                        src="/img.png"
+                        src={matchedVariant?.product_images[0] || "/img.png"}
                         alt={product.name}
                         className="w-32 h-32 object-cover rounded-lg"
                       />
@@ -513,22 +539,29 @@ const Cart = () => {
               <div className="space-y-4 mb-6 pb-6 border-b border-gray-200">
                 <div className="flex justify-between text-gray-700">
                   <span>Subtotal</span>
-                  <span className="font-semibold">₹{(calculateSubtotal())}</span>
+                  <span className="font-semibold">₹{(calculateSubtotal()).toLocaleString('en-IN')}</span>
                 </div>
 
                 {calculateSavings() > 0 && (
                   <div className="flex justify-between text-green-600">
                     <span>Product Discount</span>
-                    <span className="font-semibold">-{(calculateSavings())}</span>
+                    <span className="font-semibold">-₹{(calculateSavings()).toLocaleString('en-IN')}</span>
                   </div>
                 )}
 
                 {appliedCoupon && (
                   <div className="flex justify-between text-green-600">
                     <span>Coupon Discount</span>
-                    <span className="font-semibold">-{(calculateDiscount())}</span>
+                    <span className="font-semibold">-₹{(calculateDiscount()).toLocaleString('en-IN')}</span>
                   </div>
                 )}
+
+                <div className="flex justify-between text-gray-700">
+                  <span>Tax (GST)</span>
+                  <span className="font-semibold">
+                    ₹{(calculateTax()).toLocaleString('en-IN')}
+                  </span>
+                </div>
 
                 <div className="flex justify-between text-gray-700">
                   <span className="flex items-center">
@@ -538,13 +571,13 @@ const Cart = () => {
                     )}
                   </span>
                   <span className="font-semibold">
-                    {calculateShipping() === 0 ? 'FREE' : (calculateShipping())}
+                    {calculateShipping() === 0 ? 'FREE' : `₹${(calculateShipping()).toLocaleString('en-IN')}`}
                   </span>
                 </div>
 
                 {calculateShipping() > 0 && (
                   <div className="text-sm text-gray-600 bg-gray-50 p-3 rounded-lg">
-                    Add ₹{(10000 - calculateSubtotal())} more to get FREE shipping
+                    Add ₹{(10000 - calculateSubtotal()).toLocaleString('en-IN')} more to get FREE shipping
                   </div>
                 )}
               </div>
@@ -552,13 +585,13 @@ const Cart = () => {
               {/* Total */}
               <div className="flex justify-between items-center mb-6 text-xl">
                 <span className="font-bold text-gray-900">Total Amount</span>
-                <span className="font-bold text-gray-900">₹{(calculateTotal())}</span>
+                <span className="font-bold text-gray-900">₹{(calculateTotal()).toLocaleString('en-IN')}</span>
               </div>
 
               {calculateSavings() + calculateDiscount() > 0 && (
                 <div className="mb-6 p-4 bg-green-50 rounded-lg text-center">
                   <p className="text-green-700 font-semibold">
-                    You're saving ₹{(calculateSavings() + calculateDiscount())} on this order! 🎉
+                    You're saving ₹{(calculateSavings() + calculateDiscount()).toLocaleString('en-IN')} on this order! 🎉
                   </p>
                 </div>
               )}

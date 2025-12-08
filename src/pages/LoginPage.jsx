@@ -15,7 +15,6 @@ const LoginPage = () => {
     email: '',
     password: '',
     password_confirmation: '',
-    rememberMe: false,
     agreeTerms: false
   });
 
@@ -77,11 +76,8 @@ const LoginPage = () => {
 
       navigate('/user-profile');
     } catch (err) {
-      if (err.response?.data?.errors && Array.isArray(err.response.data.errors)) {
-        setError(err.response.data.errors);
-      } else {
-        setError(['Something went wrong. Please try again.']);
-      }
+      const e = err.response?.data?.errors;
+      setError(Array.isArray(e) ? e : [e || "Something went wrong. Please try again."]);
     } finally {
       setLoading(false);
     }
@@ -95,7 +91,6 @@ const LoginPage = () => {
       email: '',
       password: '',
       password_confirmation: '',
-      rememberMe: false,
       agreeTerms: false
     });
   };
@@ -243,16 +238,9 @@ const LoginPage = () => {
                 {/* Remember Me / Terms */}
                 <div className="flex items-center justify-between">
                   {isLogin ? (
-                    <label className="flex items-center space-x-2 cursor-pointer">
-                      <input
-                        type="checkbox"
-                        name="rememberMe"
-                        checked={formData.rememberMe}
-                        onChange={handleInputChange}
-                        className="w-4 h-4 text-gray-600 border-gray-300 rounded focus:ring-gray-500"
-                      />
-                      <span className="text-sm text-gray-600">Remember me</span>
-                    </label>
+                    <a href="/forgot-password" className="text-sm text-gray-600 hover:text-gray-900 underline">
+                      Forgot Password?
+                    </a>
                   ) : (
                     <label className="flex items-start space-x-2 cursor-pointer">
                       <input
@@ -267,12 +255,6 @@ const LoginPage = () => {
                         I agree to the <a href="/terms-conditions" className="text-gray-900 underline hover:text-gray-700">Terms of Service</a> and <a href="/privacy-policy" className="text-gray-900 underline hover:text-gray-700">Privacy Policy</a>
                       </span>
                     </label>
-                  )}
-                  
-                  {isLogin && (
-                    <a href="/login" className="text-sm text-gray-600 hover:text-gray-900 underline">
-                      Forgot Password?
-                    </a>
                   )}
                 </div>
 

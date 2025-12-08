@@ -32,6 +32,8 @@ const Addresses = ({ profileData, fetchProfile, userId }) => {
     'Delhi', 'Jammu and Kashmir', 'Ladakh', 'Lakshadweep', 'Puducherry'
   ];
 
+  const requiredFields = ["name", "phone", "address_line1", "city", "state", "pincode", "country", "address_type"];
+
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
     setFormData({
@@ -90,6 +92,15 @@ const Addresses = ({ profileData, fetchProfile, userId }) => {
   const handleSaveAddress = async () => {
     setLoading(true);
     setErrors([]);
+
+    const missing = requiredFields.filter(f => !formData[f]?.trim());
+
+    if (missing.length > 0) {
+      setErrors(missing.map(f => `${f.replace("_", " ")} is required`));
+      setLoading(false);
+      return;
+    }
+
     try {
       const token = localStorage.getItem("token"); 
 
@@ -138,17 +149,6 @@ const Addresses = ({ profileData, fetchProfile, userId }) => {
         <div className="mb-6 p-4 bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 text-green-700 rounded-xl flex items-center space-x-2">
           <CheckCircle className="w-5 h-5" />
           <span className="font-medium">{successMessage}</span>
-        </div>
-      )}
-
-      {errors.length > 0 && (
-        <div className="mb-6 p-4 bg-gradient-to-r from-red-50 to-pink-50 border border-red-200 text-red-700 rounded-xl">
-          {errors.map((err, idx) => (
-            <p key={idx} className="flex items-center space-x-2">
-              <div className="w-2 h-2 bg-red-500 rounded-full"></div>
-              <span>{err}</span>
-            </p>
-          ))}
         </div>
       )}
 
@@ -254,6 +254,16 @@ const Addresses = ({ profileData, fetchProfile, userId }) => {
 
               {/* Modal Body */}
               <div className="max-h-[60vh] overflow-y-auto px-6 py-6">
+                {errors.length > 0 && (
+                  <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700">
+                    {errors.map((err, idx) => (
+                      <p key={idx} className="text-sm flex items-center gap-2">
+                        <span className="w-2 h-2 bg-red-500 rounded-full"></span>
+                        {err}
+                      </p>
+                    ))}
+                  </div>
+                )}
                 <div className="grid grid-cols-2 gap-3">
                   {["name", "phone", "address_line1", "address_line2"].map((field) => (
                     <div key={field} className="col-span-2">
@@ -390,18 +400,6 @@ const Addresses = ({ profileData, fetchProfile, userId }) => {
                     <span className="text-sm font-medium text-gray-700">Set as default address</span>
                   </div>
                 </div>
-
-                {/* Error Messages */}
-                {errors.length > 0 && (
-                  <div className="mt-4 rounded-lg bg-red-50 border border-red-200 p-4">
-                    {errors.map((err, idx) => (
-                      <p key={idx} className="flex items-center space-x-2 text-sm text-red-700">
-                        <div className="h-1.5 w-1.5 rounded-full bg-red-500" />
-                        <span>{err}</span>
-                      </p>
-                    ))}
-                  </div>
-                )}
               </div>
 
               {/* Modal Footer */}

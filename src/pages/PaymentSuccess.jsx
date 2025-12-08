@@ -7,6 +7,7 @@ import api from "../components/Api";
 export default function PaymentSuccess() {
   const navigate = useNavigate();
   const [orderNumber, setOrderNumber] = useState("");
+  const [amountPaid, setAmountPaid] = useState("");
   const [status, setStatus] = useState("Verifying...");
   const [searchParams] = useSearchParams();
 
@@ -37,10 +38,14 @@ export default function PaymentSuccess() {
         const data = res.data?.data || {};
         if (res.data.success) {
           toast.success("Payment successful!");
-          setOrderNumber(data.order_id);
+          const createdOrderId = res.data.order_id;
+          const createdOrderNumber = res.data.order_number;
+          const paidAmount = res.data.total_amount;
+          setOrderNumber(createdOrderNumber);
+          setAmountPaid(paidAmount);
           setStatus("Paid");
 
-          setTimeout(() => navigate(`/orders/${data.order_id}`), 5000);
+          setTimeout(() => navigate(`/orders/${createdOrderId}`), 5000);
         } else {
           toast.error(data.message || "Payment verification failed!");
           setStatus("Failed");
@@ -78,7 +83,7 @@ export default function PaymentSuccess() {
             </div>
             <div className="flex justify-between mb-3">
               <span className="text-gray-600">Amount Paid</span>
-              {/* <span className="font-semibold text-gray-900">{total_amount}</span> */}
+              <span className="font-semibold text-gray-900">{amountPaid}</span>
             </div>
             <div className="flex justify-between">
               <span className="text-gray-600">Status</span>
@@ -95,3 +100,5 @@ export default function PaymentSuccess() {
     </div>
   );
 }
+
+

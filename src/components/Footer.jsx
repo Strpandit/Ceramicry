@@ -82,15 +82,15 @@ const Footer = () => {
             <div className="space-y-3 mb-6">
               <div className="flex items-center text-sm text-gray-600">
                 <Mail size={16} className="mr-3 flex-shrink-0" />
-                support@ceramicry.com
+                shailesh2081994@gmail.com
               </div>
               <div className="flex items-center text-sm text-gray-600">
                 <Phone size={16} className="mr-3 flex-shrink-0" />
-                (0) 73541-123
+                +91 99900-21009
               </div>
               <div className="flex items-center text-sm text-gray-600">
                 <MapPin size={16} className="mr-3 flex-shrink-0" />
-                123 New Delhi, Shahdara Delhi
+                H-105, street no 13, jai prakash nagar, Ghonda, delhi-110053
               </div>
             </div>
           </div>

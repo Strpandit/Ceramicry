@@ -417,7 +417,7 @@ function generateInvoice(order) {
       pageHeight - 60
     );
     doc.text(
-      "For returns or queries, contact: support@ceramicry.com | +91 99999 99999",
+      "For returns or queries, contact: shailesh2081994@gmail.com | +91 99900-21009",
       margin,
       pageHeight - 45
     );

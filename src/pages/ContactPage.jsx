@@ -54,28 +54,28 @@ const ContactPage = () => {
     {
       icon: Phone,
       title: "Phone",
-      details: ["+91 (0) 73541-123", "+91 (0) 73541-124"],
+      details: ["+91 99900-21009", "+91 97178-32482"],
       description: "Mon-Sat 9AM-7PM",
       color: "bg-blue-100 text-blue-600"
     },
     {
       icon: Mail,
       title: "Email",
-      details: ["hello@ceramicry.com", "support@ceramicry.com"],
+      details: ["shailesh2081994@gmail.com"],
       description: "We'll respond within 24 hours",
       color: "bg-green-100 text-green-600"
     },
     {
       icon: MapPin,
       title: "Visit Us",
-      details: ["123 Pottery Lane", "Artisan City, AC 12345"],
+      details: ["H-105, street no 13, jai prakash", "nagar, Ghonda, delhi-110053"],
       description: "See our showroom collection",
       color: "bg-purple-100 text-purple-600"
     },
     {
       icon: MessageCircle,
       title: "WhatsApp",
-      details: ["+91 98765-43210"],
+      details: ["+91 99900-21009"],
       description: "Quick support & updates",
       color: "bg-green-100 text-green-600"
     }
@@ -304,7 +304,7 @@ const ContactPage = () => {
               <h3 className="text-xl font-semibold text-gray-900 mb-4">Quick Actions</h3>
               <div className="space-y-3">
                 <a
-                  href="tel:+917354112345"
+                  href="tel:+919990021009"
                   className="flex items-center p-3 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors duration-200"
                 >
                   <Phone className="text-blue-600 mr-3" size={20} />
@@ -312,7 +312,7 @@ const ContactPage = () => {
                 </a>
                 
                 <a
-                  href="https://api.whatsapp.com/send/?phone=919876543210&amp;text=Hello!+Ceramicry,+I+want+to+know+more+about+your+products"
+                  href="https://api.whatsapp.com/send/?phone=919990021009&amp;text=Hello!+Ceramicry,+I+want+to+know+more+about+your+products"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center p-3 bg-green-50 rounded-lg hover:bg-green-100 transition-colors duration-200"
@@ -322,7 +322,7 @@ const ContactPage = () => {
                 </a>
                 
                 <a
-                  href="mailto:hello@ceramicry.com"
+                  href="mailto:shailesh2081994@gmail.com"
                   className="flex items-center p-3 bg-purple-50 rounded-lg hover:bg-purple-100 transition-colors duration-200"
                 >
                   <Mail className="text-purple-600 mr-3" size={20} />
@@ -364,9 +364,10 @@ const ContactPage = () => {
             {/* Placeholder for Map */}
             <div className="h-64 bg-gray-200 flex items-center justify-center">
               <div className="text-center">
-                <MapPin className="mx-auto text-gray-400 mb-2" size={48} />
+                {/* <MapPin className="mx-auto text-gray-400 mb-2" size={48} />
                 <p className="text-gray-500">Interactive Map</p>
-                <p className="text-sm text-gray-400">123 Pottery Lane, Artisan City</p>
+                <p className="text-sm text-gray-400">123 Pottery Lane, Artisan City</p> */}
+                <iframe src="https://www.google.com/maps/embed?pb=!1m17!1m12!1m3!1d3499.869427099817!2d77.25751677550305!3d28.69355227563145!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m2!1m1!2zMjjCsDQxJzM2LjgiTiA3N8KwMTUnMzYuMyJF!5e0!3m2!1sen!2sin!4v1764909944356!5m2!1sen!2sin" width="600" height="450" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
               </div>
             </div>
           </div>

@@ -24,6 +24,8 @@ import AgentOrders from './pages/AgentOrders';
 import AgentOrderDetails from './pages/AgentOrderDetails';
 import PaymentSuccess from './pages/PaymentSuccess';
 import PaymentFailed from './pages/PaymentFailed';
+import ForgotPassword from "./pages/ForgotPassword";
+import ResetPassword from "./pages/ResetPassword";
 
 function App() {
   const location = useLocation();
@@ -53,6 +55,8 @@ function App() {
         <Route path="/agent/login" element={<AgentLogin />} />
         <Route path="/agent/orders" element={<AgentOrders />} />
         <Route path="/agent/orders/:id" element={<AgentOrderDetails />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
       </Routes>
       {!isAgentRoute && <GoToTopButton />}
       {!isAgentRoute && <Footer />}

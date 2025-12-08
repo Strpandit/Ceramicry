@@ -6,9 +6,6 @@ const PrivacyPolicy = () => {
       <h1 className="text-4xl font-bold text-purple-700 mb-6 pb-4 border-b-4 border-purple-600">
         Privacy Policy
       </h1>
-      <p className="text-sm text-gray-600 mb-8">
-        <strong>Last Updated:</strong> October 12, 2025
-      </p>
 
       <div className="bg-blue-50 border-l-4 border-blue-500 p-4 mb-8">
         <p className="text-gray-700">
@@ -326,17 +323,6 @@ const PrivacyPolicy = () => {
             <p className="text-gray-700">File complaints with our Grievance Officer or consumer forums</p>
           </div>
         </div>
-
-        <div className="bg-blue-50 border-l-4 border-blue-500 p-4 mt-6">
-          <p className="font-semibold text-blue-800 mb-2">How to Exercise Your Rights</p>
-          <p className="text-gray-700 mb-2">To exercise any of these rights, please contact us at:</p>
-          <ul className="list-disc ml-6 space-y-1 text-gray-700">
-            <li>Email: privacy@ceramicry.com</li>
-            <li>Phone: 1800-XXX-XXXX</li>
-            <li>Or through your account settings on our website</li>
-          </ul>
-          <p className="text-sm text-gray-600 mt-2">We will respond to your request within 30 days</p>
-        </div>
       </section>
 
       {/* Cookies */}
@@ -430,9 +416,9 @@ const PrivacyPolicy = () => {
           <div className="space-y-2">
             <p><strong>Name:</strong> [Officer Full Name]</p>
             <p><strong>Designation:</strong> Grievance Officer</p>
-            <p><strong>Email:</strong> grievance@ceramicry.com</p>
-            <p><strong>Phone:</strong> +91-XXXXX-XXXXX</p>
-            <p><strong>Address:</strong> Ceramicry Private Limited, [Complete Address with Pin Code]</p>
+            <p><strong>Email:</strong> shailesh2081994@gmail.com</p>
+            <p><strong>Phone:</strong> +91 99900-21009</p>
+            <p><strong>Address:</strong> Ceramicry Private Limited, [H-105, street no 13, jai prakash nagar, Ghonda, delhi-110053]</p>
             <p className="text-sm text-purple-100 mt-4">
               <strong>Response Time:</strong> We acknowledge complaints within 24 hours and resolve within 30 days 
               (as per IT Rules, 2011)
@@ -461,20 +447,11 @@ const PrivacyPolicy = () => {
           <div className="space-y-3">
             <div>
               <p className="font-semibold text-lg mb-2">For Privacy-Related Queries:</p>
-              <p>Email: privacy@ceramicry.com</p>
-              <p>Phone: 1800-XXX-XXXX (Toll-free)</p>
-              <p>WhatsApp: +91-XXXXX-XXXXX</p>
+              <p>Email: shailesh2081994@gmail.com</p>
+              <p>Phone: +91 99900-21009</p>
+              <p>WhatsApp: +91 99900-21009</p>
             </div>
-            
-            <div className="mt-4 pt-4 border-t border-purple-400">
-              <p className="font-semibold">Registered Office & Corporate Details:</p>
-              <p className="mt-2">Ceramicry Private Limited</p>
-              <p>[Complete Registered Address]</p>
-              <p>[City, State - Pin Code]</p>
-              <p className="mt-2">CIN: [Corporate Identification Number]</p>
-              <p>GST: [GSTIN Number]</p>
-              <p>Email: legal@ceramicry.com</p>
-            </div>
+
           </div>
         </div>
       </section>

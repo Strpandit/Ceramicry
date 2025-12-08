@@ -53,7 +53,7 @@ const Header = () => {
       <div className="flex justify-between items-center px-6 py-2 text-sm text-gray-600 border-b bg-white">
         <span>Free shipping on orders above ₹10000</span>
         <div className="flex items-center space-x-4">
-          <span>Customer Service: (0) 73541-123</span>
+          <span>Customer Service: +91 99900-21009</span>
           <button
             onClick={() => user ? navigate('/user-profile') :  navigate('/login')}
             className="hidden lg:flex items-center space-x-1 hover:text-black"

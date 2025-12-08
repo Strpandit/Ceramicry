@@ -86,6 +86,32 @@ const OrderTrack = () => {
               </div>
             ))}
           </div>
+          {/* Shiprocket Tracking Info */}
+          {order.shiprocket && (
+            <div className="mt-8 p-4 bg-blue-50 rounded-lg border border-blue-200">
+              <div className="flex flex-wrap items-center gap-6 justify-between mb-1">
+                <div>
+                  <div className="font-semibold text-blue-900">Live Shipment Tracking</div>
+                  <div className="text-sm text-gray-700 mt-0.5">Courier: <span className="font-medium">{order.shiprocket.courier_name || '-'}</span></div>
+                  <div className="text-sm text-gray-700">AWB Code: <span className="font-mono text-gray-900">{order.shiprocket.awb_code}</span></div>
+                </div>
+                <a
+                  href={order.shiprocket.tracking_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-block px-4 py-2 bg-blue-500 text-white rounded-lg font-semibold hover:bg-blue-600 transition-colors"
+                >
+                  Track Live
+                </a>
+              </div>
+              <div className="text-sm text-gray-600 mt-2">
+                <span className="font-medium">Last Shiprocket Status:</span> {order.shiprocket.last_status || '-'}
+                {order.shiprocket.last_synced_at && (
+                  <span className="ml-2">(Updated: {formatDateTime(order.shiprocket.last_synced_at)})</span>
+                )}
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>
