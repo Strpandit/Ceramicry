@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { ArrowLeft, Package, CheckCircle, MapPin, CreditCard, Download, Phone, Mail } from 'lucide-react';
+import { ArrowLeft, Package, MapPin, CreditCard, Download, Phone, Mail } from 'lucide-react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
 import api from '../components/Api';
 import { Toaster, toast } from 'react-hot-toast';

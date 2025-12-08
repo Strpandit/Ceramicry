@@ -367,7 +367,7 @@ const ContactPage = () => {
                 {/* <MapPin className="mx-auto text-gray-400 mb-2" size={48} />
                 <p className="text-gray-500">Interactive Map</p>
                 <p className="text-sm text-gray-400">123 Pottery Lane, Artisan City</p> */}
-                <iframe src="https://www.google.com/maps/embed?pb=!1m17!1m12!1m3!1d3499.869427099817!2d77.25751677550305!3d28.69355227563145!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m2!1m1!2zMjjCsDQxJzM2LjgiTiA3N8KwMTUnMzYuMyJF!5e0!3m2!1sen!2sin!4v1764909944356!5m2!1sen!2sin" width="600" height="450" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+                <iframe title="google-map" src="https://www.google.com/maps/embed?pb=!1m17!1m12!1m3!1d3499.869427099817!2d77.25751677550305!3d28.69355227563145!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m2!1m1!2zMjjCsDQxJzM2LjgiTiA3N8KwMTUnMzYuMyJF!5e0!3m2!1sen!2sin!4v1764909944356!5m2!1sen!2sin" width="600" height="450" allowFullScreen="" loading="lazy" referrerPolicy="no-referrer-when-downgrade"></iframe>
               </div>
             </div>
           </div>

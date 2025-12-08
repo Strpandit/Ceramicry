@@ -119,7 +119,7 @@ const ProductsPage = () => {
     fetchProducts(true);
   }, [
     query, selectedCategory, selectedSubcategory,
-    priceFrom, priceTo, selectedMaterial, sortBy
+    priceFrom, priceTo, selectedMaterial, sortBy, fetchProducts
   ]);
 
   useEffect(() => {
@@ -138,7 +138,7 @@ const ProductsPage = () => {
   // Fetch next page when page increments
   useEffect(() => {
     if (page > 1) fetchProducts(false);
-  }, [page]);
+  }, [page, fetchProducts]);
   
   const handleMaterialToggle = (material) => {
     setSelectedMaterial(material);

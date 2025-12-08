@@ -37,7 +37,7 @@ export default function ForgotPassword() {
     setSendingOtp(true);
     
     try {
-      const res = await api.post("/forgot_password", { email });
+      await api.post("/forgot_password", { email });
       toast.success("OTP sent!");
       
       setAttempts((prev) => prev + 1);
