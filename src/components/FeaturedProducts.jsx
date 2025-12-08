@@ -82,7 +82,7 @@ const FeaturedProducts = () => {
             {/* Image */}
             <a href={`/product/${item.slug}`} className="relative w-full h-56 overflow-hidden group">
               <img
-                src={item?.variants[0]?.product_images[0] || "/img.png"}
+                src={item?.variants?.[0].product_images[0] || "/img.png"}
                 alt={item.name}
                 className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
               />
