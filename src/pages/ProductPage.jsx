@@ -411,7 +411,7 @@ const ProductCard = ({ product, viewMode }) => {
       <div className="bg-white rounded-lg shadow-sm hover:shadow-lg transition-all duration-300 p-4 sm:p-6 flex gap-6">
         <div className="w-32 h-32 flex-shrink-0 bg-gradient-to-br from-gray-100 to-gray-200 rounded-lg flex items-center justify-center text-6xl">
           <a href={`/product/${product.slug}`} className="relative w-full h-full overflow-hidden group">
-            <img src={product?.variants?.[0].product_images[0] || "/img.png"} alt="product-image" className='w-full h-full object-cover' />
+            <img src={product?.variants?.[0]?.product_images?.[0] || "/img.png"} alt="product-image" className='w-full h-full object-cover' />
           </a>
         </div>
         
@@ -497,7 +497,7 @@ const ProductCard = ({ product, viewMode }) => {
       <div className="relative">
         <div className="aspect-square bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center text-8xl group-hover:scale-105 transition-transform duration-300">
           <a href={`/product/${product.slug}`} className="relative w-full h-full overflow-hidden group">
-            <img src={product?.variants?.[0].product_images[0] || "/img.png"} alt="product-image" className='w-full h-full object-cover' />
+            <img src={product?.variants?.[0]?.product_images?.[0] || "/img.png"} alt="product-image" className='w-full h-full object-cover' />
           </a>
         </div>
         

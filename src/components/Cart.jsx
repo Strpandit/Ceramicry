@@ -348,7 +348,7 @@ const Cart = () => {
                     {/* Product Image */}
                     <div className="w-32 h-32 flex-shrink-0 bg-gradient-to-br from-gray-100 to-gray-200 rounded-lg flex items-center justify-center text-6xl">
                       <img
-                        src={matchedVariant?.product_images[0] || "/img.png"}
+                        src={matchedVariant?.product_images?.[0] || "/img.png"}
                         alt={product.name}
                         className="w-32 h-32 object-cover rounded-lg"
                       />
