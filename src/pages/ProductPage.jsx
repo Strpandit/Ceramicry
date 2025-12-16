@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate, useLocation } from "react-router-dom";
 import { Grid, List, ShoppingCart, Star, SlidersHorizontal, ChevronDown, X } from 'lucide-react';
 import { useCart } from "../context/CartContext";
@@ -23,11 +23,12 @@ const ProductsPage = () => {
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [subcategories, setSubcategories] = useState([]);
-  const [loading, setLoading] = useState(false);
   const [fetchError, setFetchError] = useState(null);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
+  const abortRef = useRef(null);
 
 
   const materials = ['Porcelain', 'Ceramic', 'Stoneware', 'Melamine', 'Fine bone china'];
@@ -65,58 +66,59 @@ const ProductsPage = () => {
     }
   };
 
-  const fetchProducts = useCallback(async (reset = false) => {
-
-    if (reset) {
-      setPage(1);
-      setProducts([]);
-      setHasMore(true);
-    }
-
+  const fetchProducts = useCallback(async ({ reset = false } = {}) => {
+    if (loading || loadingMore) return;
     if (!hasMore && !reset) return;
 
-    const isInitialLoad = reset;
-    if (isInitialLoad) setLoading(true);
-    else setLoadingMore(true);
+    if (abortRef.current) {
+      abortRef.current.abort();
+    }
+
+    const controller = new AbortController();
+    abortRef.current = controller;
+
+    reset ? setLoading(true) : setLoadingMore(true);
 
     try {
       const params = {
-        min_price: priceFrom,
-        max_price: priceTo,
-        sort_by: sortBy || 'featured',
         page: reset ? 1 : page,
         per_page: 12,
+        sort_by: sortBy || 'featured',
       };
 
       if (query) params.search = query;
       if (selectedCategory) params.category = selectedCategory;
       if (selectedSubcategory) params.subcategory = selectedSubcategory;
+      if (priceFrom) params.min_price = priceFrom;
+      if (priceTo) params.max_price = priceTo;
       if (selectedMaterial) params.material = selectedMaterial;
 
-      const res = await api.get("products", { params });
+      const res = await api.get("products", { params, signal: controller.signal, });
       const newProducts = res.data?.data || [];
       const pagination = res.data?.pagination;
 
-      if (reset) {
-        setProducts(newProducts);
-      } else {
-        setProducts(prev => [...prev, ...newProducts]);
-      }
+      setProducts(prev =>
+        reset ? newProducts : [...prev, ...newProducts]
+      );
 
-      if (pagination?.current_page >= pagination?.total_pages) {
+      if (!pagination || pagination.current_page >= pagination.total_pages) {
         setHasMore(false);
       }
     } catch (err) {
-      setProducts([]);
-      setFetchError("Something went wrong fetching products");
+      if (err.name !== "CanceledError") {
+        setFetchError("Something went wrong fetching products");
+        setProducts([]);
+      }
     } finally {
       setLoading(false);
       setLoadingMore(false);
     }
-  }, [query, selectedCategory, selectedSubcategory, priceFrom, priceTo, selectedMaterial, sortBy, page, hasMore]);
+  }, [query, selectedCategory, selectedSubcategory, priceFrom, priceTo, selectedMaterial, sortBy, page, hasMore, loading, loadingMore]);
 
   useEffect(() => {
-    fetchProducts(true);
+    setPage(1);
+    setHasMore(true);
+    fetchProducts({reset: true});
   }, [
     query, selectedCategory, selectedSubcategory,
     priceFrom, priceTo, selectedMaterial, sortBy, fetchProducts
@@ -124,20 +126,22 @@ const ProductsPage = () => {
 
   useEffect(() => {
     const onScroll = () => {
-      if (loadingMore || !hasMore) return;
+      if (!hasMore || loadingMore || loading) return;
 
-      if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 350) {
+      if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 400) {
         setPage((prev) => prev + 1);
       }
     };
 
     window.addEventListener("scroll", onScroll);
     return () => window.removeEventListener("scroll", onScroll);
-  }, [loadingMore, hasMore]);
+  }, [hasMore, loadingMore, loading]);
 
   // Fetch next page when page increments
   useEffect(() => {
-    if (page > 1) fetchProducts(false);
+    if (page > 1){
+      fetchProducts();
+    }
   }, [page, fetchProducts]);
   
   const handleMaterialToggle = (material) => {
