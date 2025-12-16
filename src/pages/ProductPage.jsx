@@ -29,6 +29,9 @@ const ProductsPage = () => {
   const [loading, setLoading] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
   const abortRef = useRef(null);
+  const loadingRef = useRef(false);
+  const loadingMoreRef = useRef(false);
+  const hasMoreRef = useRef(true);
 
 
   const materials = ['Porcelain', 'Ceramic', 'Stoneware', 'Melamine', 'Fine bone china'];
@@ -66,9 +69,21 @@ const ProductsPage = () => {
     }
   };
 
+  useEffect(() => {
+    loadingRef.current = loading;
+  }, [loading]);
+
+  useEffect(() => {
+    loadingMoreRef.current = loadingMore;
+  }, [loadingMore]);
+
+  useEffect(() => {
+    hasMoreRef.current = hasMore;
+  }, [hasMore]);
+
   const fetchProducts = useCallback(async ({ reset = false } = {}) => {
-    if (loading || loadingMore) return;
-    if (!hasMore && !reset) return;
+    if (loadingRef.current || loadingMoreRef.current) return;
+    if (!hasMoreRef.current && !reset) return;
 
     if (abortRef.current) {
       abortRef.current.abort();
