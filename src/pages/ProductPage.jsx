@@ -107,13 +107,13 @@ const ProductsPage = () => {
     } catch (err) {
       if (err.name !== "CanceledError") {
         setFetchError("Something went wrong fetching products");
-        setProducts([]);
+        // setProducts([]);
       }
     } finally {
       setLoading(false);
       setLoadingMore(false);
     }
-  }, [query, selectedCategory, selectedSubcategory, priceFrom, priceTo, selectedMaterial, sortBy, page, hasMore, loading, loadingMore]);
+  }, [query, selectedCategory, selectedSubcategory, priceFrom, priceTo, selectedMaterial, sortBy, page]);
 
   useEffect(() => {
     setPage(1);
@@ -135,14 +135,14 @@ const ProductsPage = () => {
 
     window.addEventListener("scroll", onScroll);
     return () => window.removeEventListener("scroll", onScroll);
-  }, [hasMore, loadingMore, loading]);
+  }, [hasMore, loading, loadingMore]);
 
   // Fetch next page when page increments
   useEffect(() => {
-    if (page > 1){
+    if (page > 1 && hasMore) {
       fetchProducts();
     }
-  }, [page, fetchProducts]);
+  }, [page, hasMore, fetchProducts]);
   
   const handleMaterialToggle = (material) => {
     setSelectedMaterial(material);
